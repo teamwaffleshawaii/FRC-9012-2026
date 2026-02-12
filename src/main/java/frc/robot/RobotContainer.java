@@ -22,6 +22,7 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LauncherSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -41,6 +42,7 @@ public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final IntakeSubsystem intake = new IntakeSubsystem();
+  private final LauncherSubsystem m_launcher = new LauncherSubsystem();
   //...Add more here
   
   //Controller for Driver 1
@@ -133,6 +135,11 @@ public class RobotContainer {
     // D-pad DOWN → Pivot DOWN
     new POVButton(operatorController, 180)
       .onTrue(new InstantCommand(intake::pivotDown, intake));
+    
+    //Launcher
+    new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
+    .whileTrue(new RunCommand(() -> m_launcher.runLauncher(0.2), m_launcher))
+    .onFalse(new InstantCommand(() -> m_launcher.stop(), m_launcher));
   }
 
   /**
