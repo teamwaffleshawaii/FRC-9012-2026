@@ -15,6 +15,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
@@ -38,11 +39,9 @@ import java.util.List;
 public class RobotContainer {
 
   // The robot's subsystems
-  // Add other subsystems here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  
   private final IntakeSubsystem intake = new IntakeSubsystem();
-
+  //...Add more here
   
   //Controller for Driver 1
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -50,6 +49,9 @@ public class RobotContainer {
   //Controller for Driver 2
   private final XboxController operatorController = new XboxController(1);
 
+  //For drivetrain speed control
+  double speedFactor = 0.5 * (1 - m_driverController.getRawAxis(4));  //drivetrain speed control 
+  
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -57,18 +59,38 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    // Configure default commands
+    // Configure default commands, updated with speed
     m_robotDrive.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
-            () -> m_robotDrive.drive(
-                
-                -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
-                true),
-            m_robotDrive));
+    new RunCommand(
+        () -> {
+            // ---------- Translation Speed Factor (Axis 4) ----------
+            double rawThrottle = -m_driverController.getRawAxis(4); // Right stick Y
+            double translationFactor = MathUtil.applyDeadband(rawThrottle, 0.05);
+            translationFactor = (translationFactor + 1) / 2.0;       // -1..1 -> 0..1
+            translationFactor = MathUtil.clamp(translationFactor, 0.2, 1.0); // min 20% speed
+
+            // ---------- Rotation Speed Factor (Axis 3) ----------
+            // You could also tie this to a separate slider or keep it fixed
+            double rawRot = -m_driverController.getRawAxis(3); // Right stick X
+            double rotationFactor = MathUtil.applyDeadband(rawRot, 0.05);
+            rotationFactor = rotationFactor * 0.5; // limit max rotation speed to 50% of full
+
+            // ---------- Driver Joystick Inputs ----------
+            double xSpeed = -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband) * translationFactor;
+            double ySpeed = -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband) * translationFactor;
+            double rotSpeed = rotationFactor; // rotation already scaled separately
+
+            // ---------- Drive Command ----------
+            m_robotDrive.drive(xSpeed, ySpeed, rotSpeed, true);
+
+            // ---------- Telemetry ----------
+            SmartDashboard.putNumber("Translation Factor", translationFactor);
+            SmartDashboard.putNumber("Rotation Factor", rotationFactor);
+        },
+        m_robotDrive
+    )
+);
+
   }
 
   /**
