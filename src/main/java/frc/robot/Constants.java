@@ -8,13 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
 
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.*;
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -86,39 +80,6 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
     public static final double kDriveDeadband = 0.05;
   }
-
-  public static final class VortexConstants {
-    // CAN IDs
-    public static final int kLeaderID   = 15;
-    public static final int kFollowerID = 16;
-
-    // Motor behavior
-    public static final boolean kLeaderInverted = false;
-    public static final boolean kFollowerInverted = true; 
-    // ^ usually true when motors face opposite directions on a churro axle
-
-    // Safety
-    public static final int kCurrentLimit = 80; // Vortex safe range
-
-   
-
-    private VortexConstants() {}
-}
-
-  public static final class IntakeConstants {
-    // Motor CAN IDs
-    public static final int kLeftMotorPort  = 11;
-    public static final int kRightMotorPort = 12;
-
-    public static final boolean kLeftMotorInverted  = false;
-    public static final boolean kRightMotorInverted = true;
-
-
-  
-
-    private IntakeConstants() {}
-}
-
 
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 3;

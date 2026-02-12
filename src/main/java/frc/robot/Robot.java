@@ -5,17 +5,10 @@
 package frc.robot;
 
 
-
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.*;
-import edu.wpi.first.wpilibj.Joystick;
-import frc.robot.*;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -27,30 +20,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-  private Joystick Controller;
 
-  // public IntakeSubsystem intakeSubsystem;
-  // private LauncherSubsystem launcherSubsystem;
-   Compressor phCompressor = new Compressor(2, PneumaticsModuleType.REVPH);
-   public  DoubleSolenoid intakeSolenoid = new DoubleSolenoid(2,PneumaticsModuleType.REVPH, 0, 1);
-    
-   //Button on Controller	getRawButton() number
-// A	1
-// B	2
-// X	3
-// Y	4
-// LB	5
-// RB	6
-// Back	7
-// Start	8
-
-
-
-  int intakeExtend = 5;
-  int intakeRetract = 6;
-
-  double intakePower = 0.1;
-  double transferPower = 0.1;
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -60,7 +30,6 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    phCompressor.enableDigital();
   }
 
   /**
@@ -118,11 +87,6 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    
-     //intakeSubsystem.retractIntake();
-    
- 
-   
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
@@ -133,51 +97,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
- //intakeSubsystem.intakeSolenoid.set(Value.kForward);
 
-// A	1
-// B	2
-// X	3
-// Y	4
-// LB	5
-// RB	6
-// Back	7
-// Start	8
-
-  // if (Controller.getRawButton(1)) {
-  //   intakeSubsystem.extendIntake();
-  // }
-//TODO check to make sure that running this will not break motors ex have run at opposite sides
-// if (Controller.getRawButton(3)) {
- //  launcherSubsystem.runLauncher();
-  // }
-   if (Controller.getRawButton(2)) {
- intakeSolenoid.set(Value.kForward);
- }
-    
-
-
-
-//   if (Controller.getRawButton(intakeExtend)) {
-//     intakeSubsystem.extendIntake();
-//    }
-//   else if (Controller.getRawButton(intakeRetract)) {
-//     intakeSubsystem.retractIntake();
-//    }
-
-  
-//   if (Controller.getRawButton(3)) {
-//     intakeSubsystem.runIntake(intakePower);
-//    }  
-
-//   else if (Controller.getRawButton(2)) {
-//       intakeSubsystem.Transfer(transferPower);
-//     }
-
-//    else {
-//     intakeSubsystem.stopIntake();
-//     }
-// }
   }
 
   @Override

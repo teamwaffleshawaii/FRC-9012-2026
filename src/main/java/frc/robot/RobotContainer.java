@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -21,11 +20,13 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
+
 import java.util.List;
 
 /*
@@ -35,11 +36,19 @@ import java.util.List;
  * (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+
   // The robot's subsystems
+  // Add other subsystems here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-    private final Joystick driverJoystick = new Joystick(0);
-  // The driver's controller
+  
+  private final IntakeSubsystem intake = new IntakeSubsystem();
+
+  
+  //Controller for Driver 1
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+
+  //Controller for Driver 2
+  private final XboxController operatorController = new XboxController(1);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -81,6 +90,27 @@ public class RobotContainer {
         .onTrue(new InstantCommand(
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
+
+    //Add more button bindings here:
+    //...
+    //...
+    //So far, this includes intake only
+
+    // A → Intake ON
+    new JoystickButton(operatorController, XboxController.Button.kA.value)
+      .onTrue(new InstantCommand(intake::intakeIn, intake));
+
+    // B → Intake OFF
+    new JoystickButton(operatorController, XboxController.Button.kB.value)
+      .onTrue(new InstantCommand(intake::stopIntake, intake));
+
+    // D-pad UP → Pivot UP
+    new POVButton(operatorController, 0)
+      .onTrue(new InstantCommand(intake::pivotUp, intake));
+
+    // D-pad DOWN → Pivot DOWN
+    new POVButton(operatorController, 180)
+      .onTrue(new InstantCommand(intake::pivotDown, intake));
   }
 
   /**
@@ -93,6 +123,7 @@ public class RobotContainer {
   private double deadband(double value) {
     return Math.abs(value) > 0.08 ? value : 0.0;
 }
+
   public Command getAutonomousCommand() {
     // Create config for trajectory
     TrajectoryConfig config = new TrajectoryConfig(
