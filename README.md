@@ -22,5 +22,3 @@
 * NEO Vortex FreeSpeed RPM: 6784
 
 These values need to be adjusted in the `Configs.java` and `Constants.java` files.
-
-Logan was here!
