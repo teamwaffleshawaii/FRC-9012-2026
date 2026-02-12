@@ -18,7 +18,9 @@
 * Drivetrain Gear Max Speed: 7.22 m/s
 * TrackWidth: 22.5 inches
 * DrivingMotor Pinion Teeth: 16T
-* SpurGear Tetth: 20T
+* SpurGear Teeth: 20T
 * NEO Vortex FreeSpeed RPM: 6784
 
 These values need to be adjusted in the `Configs.java` and `Constants.java` files.
+
+Logan was here!
