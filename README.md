@@ -22,4 +22,5 @@
 * SpurGear Teeth: 20T
 * NEO Vortex FreeSpeed RPM: 6784
 
-These values are adjusted in the `Configs.java` and `Constants.java` files.
+These values are adjusted in the `Constants.java` file.
+Drivetrain PID has not been tuned yet, this can be done under `Configs.java` when ready.
