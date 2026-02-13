@@ -23,6 +23,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
+import frc.robot.subsystems.TransferSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -43,6 +44,7 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final IntakeSubsystem intake = new IntakeSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
+  private final TransferSubsystem m_Transfer = new TransferSubsystem();
   //...Add more here
   
   //Controller for Driver 1
@@ -122,11 +124,13 @@ public class RobotContainer {
 
     // A → Intake ON
     new JoystickButton(operatorController, XboxController.Button.kA.value)
-      .onTrue(new InstantCommand(intake::intakeIn, intake));
+      .onTrue(new InstantCommand(intake::intakeIn, intake))
+      .onTrue(new InstantCommand(m_Transfer::transferIn, m_Transfer));
 
     // B → Intake OFF
     new JoystickButton(operatorController, XboxController.Button.kB.value)
-      .onTrue(new InstantCommand(intake::stopIntake, intake));
+      .onTrue(new InstantCommand(intake::stopIntake, intake))
+      .onTrue(new InstantCommand(m_Transfer::transferStop, m_Transfer));
 
     // D-pad UP → Pivot UP
     new POVButton(operatorController, 0)
@@ -138,10 +142,11 @@ public class RobotContainer {
     
     //Launcher
     new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
-    .whileTrue(new RunCommand(() -> m_launcher.runLauncher(0.2), m_launcher))
+    .whileTrue(new RunCommand(() -> m_launcher.runLauncher(1), m_launcher))
     .onFalse(new InstantCommand(() -> m_launcher.stop(), m_launcher));
   }
-
+//86 inches away 65 percent
+//103 in away 70
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
