@@ -42,7 +42,7 @@ public class RobotContainer {
 
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  private final IntakeSubsystem intake = new IntakeSubsystem();
+  private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
   private final TransferSubsystem m_Transfer = new TransferSubsystem();
   //...Add more here
@@ -117,36 +117,42 @@ public class RobotContainer {
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
 
-    //Add more button bindings here:
-    //...
-    //...
-    //So far, this includes intake only
+    //Add button bindings here:
 
-    // A → Intake ON
+    // A → Intake ON and Transfer ON
     new JoystickButton(operatorController, XboxController.Button.kA.value)
-      .onTrue(new InstantCommand(intake::intakeIn, intake))
+      .onTrue(new InstantCommand(m_intake::intakeIn, m_intake))
       .onTrue(new InstantCommand(m_Transfer::transferIn, m_Transfer));
 
-    // B → Intake OFF
+    // B → Intake OFF and Transfer OFF
     new JoystickButton(operatorController, XboxController.Button.kB.value)
-      .onTrue(new InstantCommand(intake::stopIntake, intake))
+      .onTrue(new InstantCommand(m_intake::stopIntake, m_intake))
       .onTrue(new InstantCommand(m_Transfer::transferStop, m_Transfer));
 
-    // D-pad UP → Pivot UP
+    // D-pad UP → Intake Pivot UP
     new POVButton(operatorController, 0)
-      .onTrue(new InstantCommand(intake::pivotUp, intake));
+      .onTrue(new InstantCommand(m_intake::pivotUp, m_intake));
 
-    // D-pad DOWN → Pivot DOWN
+    // D-pad DOWN → Intake Pivot DOWN
     new POVButton(operatorController, 180)
-      .onTrue(new InstantCommand(intake::pivotDown, intake));
+      .onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
     
-    //Launcher
+    //Right bumper Pressed AND HELD → Launcher On 
+    //Right bumper Released → Launcher Off
     new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
-    .whileTrue(new RunCommand(() -> m_launcher.runLauncher(1), m_launcher))
-    .onFalse(new InstantCommand(() -> m_launcher.stop(), m_launcher));
+    .whileTrue(new RunCommand(() -> m_launcher.runLauncher(0.65), m_launcher))
+    .onFalse(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
+
+    //...
+    //...
+
+    //Data collected from February 12th
+    //86" away, 65 percent
+    //103" away, 70 percent
+
   }
-//86 inches away 65 percent
-//103 in away 70
+
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
