@@ -1,4 +1,13 @@
-# MAXSwerve Java Template Changelog
+# 9012 Changelog
+
+## 2026-02-12
+
+- Added drivetrain throttle speed control
+- Added intake subsystem
+- Added transfer subsystem
+- Added launcher subsystem
+
+# MAXSwerve Changelog
 
 ## [2026.0] - 2026-01-10
 
