@@ -6,7 +6,7 @@
 * 2 Intake NEO 550 motors (CAN IDs 13, 14)
 * 2 Launchers NEO Vortex (CAN IDs 15, 16)
 * 2 Transfer NEO550 motors (CAN IDs 17, 18)
-* ...
+* 
 * Pneumatic Cylinders (0,1 for Intake pivot)
 
 ## MaxSwerve Prerequisites
@@ -21,4 +21,5 @@
 * DrivingMotor Pinion Teeth: 16T
 * SpurGear Teeth: 20T
 * NEO Vortex FreeSpeed RPM: 6784
+
 These values are adjusted in the `Configs.java` and `Constants.java` files.
