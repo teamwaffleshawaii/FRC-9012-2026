@@ -119,15 +119,17 @@ public class RobotContainer {
 
     //Add button bindings here:
 
-    // A → Intake ON and Transfer ON
+    // A Pressed AND HELD → Intake ON and Transfer ON 
     new JoystickButton(operatorController, XboxController.Button.kA.value)
       .onTrue(new InstantCommand(m_intake::intakeIn, m_intake))
-      .onTrue(new InstantCommand(m_Transfer::transferIn, m_Transfer));
+      .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake));
 
-    // B → Intake OFF and Transfer OFF
+    // B Pressed AND HELD → Transfer ON and Mecanum ON
     new JoystickButton(operatorController, XboxController.Button.kB.value)
-      .onTrue(new InstantCommand(m_intake::stopIntake, m_intake))
-      .onTrue(new InstantCommand(m_Transfer::transferStop, m_Transfer));
+    .onTrue(new InstantCommand(m_Transfer::transferIn, m_Transfer))
+    .onTrue(new InstantCommand(m_Transfer::mecanumIn, m_Transfer))
+    .onFalse(new InstantCommand(() -> m_Transfer.transferStop(), m_Transfer))
+    .onFalse(new InstantCommand(() -> m_Transfer.mecanumStop(), m_Transfer));
 
     // D-pad UP → Intake Pivot UP
     new POVButton(operatorController, 0)
@@ -140,7 +142,7 @@ public class RobotContainer {
     //Right bumper Pressed AND HELD → Launcher On 
     //Right bumper Released → Launcher Off
     new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
-    .whileTrue(new RunCommand(() -> m_launcher.runLauncher(0.65), m_launcher))
+    .whileTrue(new RunCommand(() -> m_launcher.runLauncher(0.60), m_launcher))
     .onFalse(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
 
     //...

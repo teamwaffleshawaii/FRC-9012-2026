@@ -68,7 +68,7 @@ public class IntakeSubsystem extends SubsystemBase {
         runIntake(-0.5);
     }
 
-    public void stopIntake() {
+    public void intakeStop() {
         runIntake(0.0);
     }
 
