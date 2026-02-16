@@ -12,7 +12,6 @@ public class TransferSubsystem extends SubsystemBase {
     // Motor Controllers
     // ==============================
     private final SparkMax transferMotor = new SparkMax(18, MotorType.kBrushless);
-    //private final SparkFlex transferMotor = new SparkFlex(19, MotorType.kBrushless);
     private final SparkMax mechanumMotor = new SparkMax(17, MotorType.kBrushless);
 
     // ==============================
@@ -43,7 +42,7 @@ public class TransferSubsystem extends SubsystemBase {
         runMecanum(-0.3);
     }
 
-    public void  mecanumOut() {
+    public void mecanumOut() {
         runMecanum(0.3);
     }
 
