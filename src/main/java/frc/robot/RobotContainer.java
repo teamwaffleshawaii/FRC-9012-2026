@@ -136,12 +136,22 @@ public class RobotContainer {
     // D-pad UP → Intake Pivot UP
     new POVButton(operatorController, 0)
       //.onTrue(new InstatntCommand(m_intake::pivotUp, m_intake));
-      .onTrue(new InstantCommand(m_elevator::goUp, m_elevator));
+      .onTrue(new InstantCommand(m_elevator::goTop, m_elevator));
 
     // D-pad DOWN → Intake Pivot DOWN
     new POVButton(operatorController, 180)
       //.onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
-      .onTrue(new InstantCommand(m_elevator::goDown, m_elevator));
+      .onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
+
+      // DPad Right → Move Up Slowly
+    new POVButton(operatorController, 90)
+      .whileTrue(new RunCommand(() -> 
+      m_elevator.adjustPosition(0.2), m_elevator));
+
+    // DPad Left → Move Down Slowly
+    new POVButton(operatorController, 270)
+      .whileTrue(new RunCommand(() -> 
+      m_elevator.adjustPosition(-0.2), m_elevator));
 
     
     //Right bumper Pressed AND HELD → Launcher On 
