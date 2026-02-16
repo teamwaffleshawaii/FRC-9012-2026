@@ -23,11 +23,11 @@ public class TransferSubsystem extends SubsystemBase {
     }
 
     public void transferIn() {
-        runTransfer(-0.9);
+        runTransfer(-0.8);
     }
 
     public void transferOut() {
-        runTransfer(0.9);
+        runTransfer(0.8);
     }
 
     public void transferStop() {

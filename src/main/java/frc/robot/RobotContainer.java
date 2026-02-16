@@ -24,6 +24,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -45,6 +46,7 @@ public class RobotContainer {
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
   private final TransferSubsystem m_Transfer = new TransferSubsystem();
+   private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
   //...Add more here
   
   //Controller for Driver 1
@@ -133,11 +135,14 @@ public class RobotContainer {
 
     // D-pad UP → Intake Pivot UP
     new POVButton(operatorController, 0)
-      .onTrue(new InstantCommand(m_intake::pivotUp, m_intake));
+      //.onTrue(new InstatntCommand(m_intake::pivotUp, m_intake));
+      .onTrue(new InstantCommand(m_elevator::goUp, m_elevator));
 
     // D-pad DOWN → Intake Pivot DOWN
     new POVButton(operatorController, 180)
-      .onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
+      //.onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
+      .onTrue(new InstantCommand(m_elevator::goDown, m_elevator));
+
     
     //Right bumper Pressed AND HELD → Launcher On 
     //Right bumper Released → Launcher Off
