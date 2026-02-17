@@ -130,18 +130,21 @@ public class RobotContainer {
     new JoystickButton(operatorController, XboxController.Button.kB.value)
     .onTrue(new InstantCommand(m_Transfer::transferIn, m_Transfer))
     .onTrue(new InstantCommand(m_Transfer::mecanumIn, m_Transfer))
+    .onTrue(new InstantCommand(m_intake::intakeTransfer, m_intake))
     .onFalse(new InstantCommand(() -> m_Transfer.transferStop(), m_Transfer))
-    .onFalse(new InstantCommand(() -> m_Transfer.mecanumStop(), m_Transfer));
+    .onFalse(new InstantCommand(() -> m_Transfer.mecanumStop(), m_Transfer))
+    .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake));
+
 
     // D-pad UP → Intake Pivot UP
     new POVButton(operatorController, 0)
-      //.onTrue(new InstatntCommand(m_intake::pivotUp, m_intake));
-      .onTrue(new InstantCommand(m_elevator::goTop, m_elevator));
+      .onTrue(new InstantCommand(m_intake::pivotUp, m_intake));
+      //.onTrue(new InstantCommand(m_elevator::goTop, m_elevator));
 
     // D-pad DOWN → Intake Pivot DOWN
     new POVButton(operatorController, 180)
-      //.onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
-      .onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
+      .onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
+      //.onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
 
       // DPad Right → Move Up Slowly
     new POVButton(operatorController, 90)

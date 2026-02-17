@@ -61,11 +61,15 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeIn() {
-        runIntake(0.5);
+        runIntake(0.7);
     }
 
     public void intakeOut() {
-        runIntake(-0.5);
+        runIntake(-0.7);
+    }
+
+    public void intakeTransfer() {
+        runIntake(0.2);
     }
 
     public void intakeStop() {
