@@ -16,6 +16,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
@@ -53,7 +54,8 @@ public class RobotContainer {
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
   //Controller for Driver 2
-  private final XboxController operatorController = new XboxController(1);
+  //private final XboxController operatorController = new XboxController(1); //if using Logitech F310
+  private final GenericHID operatorController = new GenericHID(1); //if using custom controller
 
   //For drivetrain speed control
   double speedFactor = 0.5 * (1 - m_driverController.getRawAxis(4));  //drivetrain speed control 
@@ -121,50 +123,56 @@ public class RobotContainer {
 
     //Add button bindings here:
 
-    // A Pressed AND HELD → Intake ON and Transfer ON 
-    new JoystickButton(operatorController, XboxController.Button.kA.value)
+    //Button 1 → Intake Pivot UP
+    new JoystickButton(operatorController, 1)
+      .onTrue(new InstantCommand(m_intake::pivotUp, m_intake));
+
+    //Button 2 → Intake Pivot DOWN
+    new JoystickButton(operatorController, 2)
+      .onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
+
+    //Button 3 → Intake
+    new JoystickButton(operatorController, 3)
       .onTrue(new InstantCommand(m_intake::intakeIn, m_intake))
       .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake));
 
-    // B Pressed AND HELD → Transfer ON and Mecanum ON
-    new JoystickButton(operatorController, XboxController.Button.kB.value)
+    //Button 4 → Elevator up MAX
+    new JoystickButton(operatorController, 4)
+      .onTrue(new InstantCommand(m_elevator::goTop, m_elevator));
+
+    //Button 5 → Elevator down MIN
+    new JoystickButton(operatorController, 5)
+      .onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
+      
+    //Button 6 → Elevator up manual
+    new JoystickButton(operatorController, 6)
+      .whileTrue(new RunCommand(() -> 
+      m_elevator.adjustPosition(0.2), m_elevator));
+
+    //Button 7 → Elevator down manual
+    new JoystickButton(operatorController, 7)
+      .whileTrue(new RunCommand(() -> 
+      m_elevator.adjustPosition(-0.2), m_elevator));
+
+    
+    //Button 8 & Button 9 pending Apriltags
+
+    //Button 10 → Launch FUELs (Transfer on)
+    new JoystickButton(operatorController, 10)
     .onTrue(new InstantCommand(m_Transfer::transferIn, m_Transfer))
     .onTrue(new InstantCommand(m_Transfer::mecanumIn, m_Transfer))
     .onTrue(new InstantCommand(m_intake::intakeTransfer, m_intake))
     .onFalse(new InstantCommand(() -> m_Transfer.transferStop(), m_Transfer))
     .onFalse(new InstantCommand(() -> m_Transfer.mecanumStop(), m_Transfer))
     .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake));
-
-
-    // D-pad UP → Intake Pivot UP
-    new POVButton(operatorController, 0)
-      .onTrue(new InstantCommand(m_intake::pivotUp, m_intake));
-      //.onTrue(new InstantCommand(m_elevator::goTop, m_elevator));
-
-    // D-pad DOWN → Intake Pivot DOWN
-    new POVButton(operatorController, 180)
-      .onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
-      //.onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
-
-      // DPad Right → Move Up Slowly
-    new POVButton(operatorController, 90)
-      .whileTrue(new RunCommand(() -> 
-      m_elevator.adjustPosition(0.2), m_elevator));
-
-    // DPad Left → Move Down Slowly
-    new POVButton(operatorController, 270)
-      .whileTrue(new RunCommand(() -> 
-      m_elevator.adjustPosition(-0.2), m_elevator));
-
     
-    //Right bumper Pressed AND HELD → Launcher On 
-    //Right bumper Released → Launcher Off
-    new JoystickButton(operatorController, XboxController.Button.kRightBumper.value)
-    .whileTrue(new RunCommand(() -> m_launcher.runLauncher(0.60), m_launcher))
-    .onFalse(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
+    //Button 11 → Launchers On
+    new JoystickButton(operatorController, 11)
+    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.60), m_launcher));
 
-    //...
-    //...
+    //Button 12 → Launchers Off
+    new JoystickButton(operatorController, 12)
+    .onTrue(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
 
     //Data collected from February 12th
     //86" away, 65 percent
