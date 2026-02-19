@@ -16,6 +16,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
@@ -50,11 +51,9 @@ public class RobotContainer {
    private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
   //...Add more here
   
-  //Controller for Driver 1
-  XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
-
-  //Controller for Driver 2
-  //private final XboxController operatorController = new XboxController(1); //if using Logitech F310
+  //Controller for Driver 1 (Joystick)
+  Joystick m_driverController = new Joystick(OIConstants.kDriverControllerPort);
+  //Controller for Driver 2 (Custom Controller)
   private final GenericHID operatorController = new GenericHID(1); //if using custom controller
 
   //For drivetrain speed control
@@ -72,7 +71,8 @@ public class RobotContainer {
     new RunCommand(
         () -> {
             // ---------- Translation Speed Factor (Axis 4) ----------
-            double rawThrottle = -m_driverController.getRawAxis(4); // Right stick Y
+            double rawThrottle = -m_driverController.getRawAxis(4);  // axis for throttle
+
             double translationFactor = MathUtil.applyDeadband(rawThrottle, 0.05);
             translationFactor = (translationFactor + 1) / 2.0;       // -1..1 -> 0..1
             translationFactor = MathUtil.clamp(translationFactor, 0.2, 1.0); // min 20% speed
@@ -84,8 +84,8 @@ public class RobotContainer {
             rotationFactor = rotationFactor * 0.5; // limit max rotation speed to 50% of full
 
             // ---------- Driver Joystick Inputs ----------
-            double xSpeed = -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband) * translationFactor;
-            double ySpeed = -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband) * translationFactor;
+            double xSpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(1), OIConstants.kDriveDeadband) * translationFactor;
+            double ySpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(2), OIConstants.kDriveDeadband) * translationFactor;
             double rotSpeed = rotationFactor; // rotation already scaled separately
 
             // ---------- Drive Command ----------
