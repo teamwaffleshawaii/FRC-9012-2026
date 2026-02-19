@@ -1,5 +1,11 @@
 # 9012 Changelog
 
+## 2026-02-18
+
+- Added elevator subsystem
+- Fixed drivetrain
+- Converted operator controls to custom console
+  
 ## 2026-02-12
 
 - Added drivetrain throttle speed control
