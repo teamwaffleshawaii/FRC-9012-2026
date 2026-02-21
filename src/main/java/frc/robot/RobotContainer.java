@@ -168,7 +168,7 @@ public class RobotContainer {
     
     //Button 11 → Launchers On
     new JoystickButton(operatorController, 11)
-    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.5), m_launcher));
+    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.65), m_launcher));
 
     //Button 12 → Launchers Off
     new JoystickButton(operatorController, 12)
