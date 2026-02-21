@@ -70,22 +70,22 @@ public class RobotContainer {
     m_robotDrive.setDefaultCommand(
     new RunCommand(
         () -> {
-            // ---------- Translation Speed Factor (Axis 4) ----------
-            double rawThrottle = -m_driverController.getRawAxis(4);  // axis for throttle
+            // ---------- Translation Speed Factor (Axis 3) ----------
+            double rawThrottle = -m_driverController.getRawAxis(3);  // axis for throttle
 
             double translationFactor = MathUtil.applyDeadband(rawThrottle, 0.05);
             translationFactor = (translationFactor + 1) / 2.0;       // -1..1 -> 0..1
             translationFactor = MathUtil.clamp(translationFactor, 0.2, 1.0); // min 20% speed
 
-            // ---------- Rotation Speed Factor (Axis 3) ----------
+            // ---------- Rotation Speed Factor (Axis 2) ----------
             // You could also tie this to a separate slider or keep it fixed
-            double rawRot = -m_driverController.getRawAxis(3); // Right stick X
+            double rawRot = -m_driverController.getRawAxis(2); // Right stick X
             double rotationFactor = MathUtil.applyDeadband(rawRot, 0.05);
             rotationFactor = rotationFactor * 0.5; // limit max rotation speed to 50% of full
 
             // ---------- Driver Joystick Inputs ----------
             double xSpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(1), OIConstants.kDriveDeadband) * translationFactor;
-            double ySpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(2), OIConstants.kDriveDeadband) * translationFactor;
+            double ySpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(0), OIConstants.kDriveDeadband) * translationFactor;
             double rotSpeed = rotationFactor; // rotation already scaled separately
 
             // ---------- Drive Command ----------
