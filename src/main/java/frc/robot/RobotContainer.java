@@ -22,16 +22,22 @@ import edu.wpi.first.wpilibj.PS4Controller.Button;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AlignToAprilTagCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LauncherSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import frc.robot.subsystems.ElevatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import java.util.List;
 
@@ -50,6 +56,7 @@ public class RobotContainer {
   private final TransferSubsystem m_Transfer = new TransferSubsystem();
    private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
   //...Add more here
+
   
   //Controller for Driver 1 (Joystick)
   Joystick m_driverController = new Joystick(OIConstants.kDriverControllerPort);
@@ -63,6 +70,14 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+     NamedCommands.registerCommand(
+            "AlignToTag31",
+            new AlignToAprilTagCommand(
+                m_robotDrive,
+                32,     // AprilTag ID
+                3.0    // timeout
+            )
+        );
     // Configure the button bindings
     configureButtonBindings();
 
@@ -134,7 +149,11 @@ public class RobotContainer {
     //Button 3 → Intake
     new JoystickButton(operatorController, 3)
       .onTrue(new InstantCommand(m_intake::intakeIn, m_intake))
-      .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake));
+     .onTrue(new InstantCommand(m_Transfer::transferInSlow, m_Transfer))
+     .onTrue(new InstantCommand(m_Transfer::mecanumOut, m_Transfer))
+      .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake))
+      .onFalse(new InstantCommand(m_Transfer::transferStop, m_Transfer))
+     .onFalse(new InstantCommand(m_Transfer::mecanumStop, m_Transfer));
 
     //Button 4 → Elevator up MAX
     new JoystickButton(operatorController, 4)
@@ -174,11 +193,103 @@ public class RobotContainer {
     new JoystickButton(operatorController, 12)
     .onTrue(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
 
+
+     // Constants
+    double targetDistanceMetersTZ = 1.40; // meters
+    double targetDistanceMetersTX = 0.45; // meters
+    double targetHeadingRY = 0;
+
+    double distanceKp = 0.5;
+    double strafeKp = 0.5;
+    double steeringKp = 0.5;
+
+    // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
+    int targetAprilTagID = 15;
+
+ new JoystickButton(operatorController, 8)
+        .whileTrue(new RunCommand(
+            () -> {
+
+                double seenTagID = LimelightHelpers.getFiducialID("limelight");
+
+                if (seenTagID != targetAprilTagID) {
+                    m_robotDrive.drive(0, 0, 0, false);
+                    return;
+                }
+
+                // botPose array: [x, y, z, roll, pitch, yaw]
+                double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
+
+                double currentStrafeX  = botPose[0]; // Left/Right
+                double currentDistanceZ = botPose[2]; // Forward/Back
+                double currentYaw       = botPose[4]; // Rotation relative to AprilTag
+
+                // Errors
+                double distanceError = -targetDistanceMetersTZ - currentDistanceZ;
+                double strafeError   = -targetDistanceMetersTX - currentStrafeX;
+                double steeringError = targetHeadingRY - currentYaw;
+                double radError = Math.toRadians(steeringError);
+
+                // Deadbands
+                if (Math.abs(distanceError) < 0.02) distanceError = 0;
+                if (Math.abs(strafeError) < 0.02) strafeError = 0;
+                if (Math.abs(steeringError) < 2.0) steeringError = 0;
+
+                m_robotDrive.drive(
+                    distanceError * distanceKp,   // Forward/back
+                    -strafeError * strafeKp,      // Left/Right
+                    -radError * steeringKp,       // Rotation
+                    false
+                );
+            },
+            m_robotDrive
+        ));
+
+    int[] VALID_TAGS = {15,31,12};
+
+
+
+    new JoystickButton(operatorController, 9).whileTrue(new RunCommand(() -> {
+
+    boolean hasTarget = LimelightHelpers.getTV("limelight");
+
+    if (!hasTarget) {
+        m_launcher.stopLauncher();
+        return;
+    }
+
+    double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
+    double tz = Math.abs(botPose[2]);
+
+    // ----- Tunable Constants -----
+    double tzMin = 0.8;   // ~2.5 ft
+    double tzMax = 3.0;   // ~10 ft
+    double powerMin = 0.30;
+    double powerMax = 0.65;
+
+    double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);
+
+    double motorPower =
+            powerMin +
+            (clampedTz - tzMin) * (powerMax - powerMin) / (tzMax - tzMin);
+
+    m_launcher.setPower(motorPower);
+
+    SmartDashboard.putNumber("Shooter Distance (m)", tz);
+    SmartDashboard.putNumber("Shooter Power", motorPower);
+
+}, m_launcher));}
+                
+               
+  
+
+      
+
     //Data collected from February 12th
     //86" away, 65 percent
     //103" away, 70 percent
 
-  }
+  
 
 
   /**

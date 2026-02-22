@@ -24,6 +24,9 @@ public class TransferSubsystem extends SubsystemBase {
     public void transferIn() {
         runTransfer(-0.9);
     }
+    public void transferInSlow() {
+        runTransfer(-0.3);
+    }
 
     public void transferOut() {
         runTransfer(0.9);
@@ -43,7 +46,7 @@ public class TransferSubsystem extends SubsystemBase {
     }
 
     public void mecanumOut() {
-        runMecanum(0.15);
+        runMecanum(0.35);
     }
 
     public void mecanumStop() {

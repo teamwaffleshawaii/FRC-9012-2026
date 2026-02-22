@@ -18,6 +18,7 @@ public class LauncherSubsystem extends SubsystemBase {
 
     stopLauncher();
   }
+public double cahcedPower = 0.0;
 
   public void runLauncher(double speed) {
     launcherMotor1.set(speed);
@@ -25,6 +26,15 @@ public class LauncherSubsystem extends SubsystemBase {
   }
 
   public void stopLauncher() {
+    launcherMotor1.set(0);
+    launcherMotor2.set(0);
+  }
+  public void holdLastPower() {
+    launcherMotor1.set(cahcedPower);
+    launcherMotor2.set(cahcedPower);
+  }
+   public void setPower(double power) {
+    cahcedPower = power;
     launcherMotor1.set(0);
     launcherMotor2.set(0);
   }
