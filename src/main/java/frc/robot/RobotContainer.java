@@ -126,12 +126,12 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(m_driverController, Button.kR1.value)
+    new JoystickButton(m_driverController, 3)
         .whileTrue(new RunCommand(
             () -> m_robotDrive.setX(),
             m_robotDrive));
 
-    new JoystickButton(m_driverController, XboxController.Button.kStart.value)
+    new JoystickButton(m_driverController, 2)
         .onTrue(new InstantCommand(
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
@@ -280,16 +280,10 @@ public class RobotContainer {
 
 }, m_launcher));}
                 
-               
-  
-
-      
 
     //Data collected from February 12th
     //86" away, 65 percent
     //103" away, 70 percent
-
-  
 
 
   /**

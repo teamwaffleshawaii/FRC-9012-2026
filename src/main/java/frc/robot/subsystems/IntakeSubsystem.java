@@ -61,16 +61,16 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeIn() {
-        runIntake(0.7);
+        runIntake(0.8);
     }
 
     public void intakeOut() {
-        runIntake(-0.7);
+        runIntake(-0.8);
     }
 
     //For during transfer to prevent FUELs from being stuck by the intake
     public void intakeTransfer() {
-        runIntake(0.2);
+        runIntake(0.3);
     }
 
     public void intakeStop() {
