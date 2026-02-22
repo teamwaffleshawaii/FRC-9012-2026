@@ -100,35 +100,5 @@ public class IntakeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Optional: Add SmartDashboard telemetry here
-        // Motor Output (-1 to 1)
-        SmartDashboard.putNumber("Intake Left Output", intakeLeft.get());
-        SmartDashboard.putNumber("Intake Right Output", intakeRight.get());
-
-        // Motor Current (amps)
-        SmartDashboard.putNumber("Intake Left Current", intakeLeft.getOutputCurrent());
-        SmartDashboard.putNumber("Intake Right Current", intakeRight.getOutputCurrent());
-
-        // Motor Velocity (RPM)
-        SmartDashboard.putNumber(
-            "Intake Left Velocity",
-            intakeLeft.getEncoder().getVelocity()
-        );
-
-        SmartDashboard.putNumber(
-            "Intake Right Velocity",
-            intakeRight.getEncoder().getVelocity()
-        );
-
-        // Pivot State
-        SmartDashboard.putString(
-            "Intake Pivot State",
-            pivotSolenoid.get().toString()
-        );
-
-        // Intake Running Boolean
-        SmartDashboard.putBoolean(
-            "Intake Running",
-            Math.abs(intakeLeft.get()) > 0.05
-        );
     }
 }
