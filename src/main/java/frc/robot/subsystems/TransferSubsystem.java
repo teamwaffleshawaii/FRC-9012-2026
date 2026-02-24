@@ -42,7 +42,7 @@ public class TransferSubsystem extends SubsystemBase {
     }
 
     public void mecanumIn() {
-        runMecanum(-0.60);
+        runMecanum(-0.75);
     }
 
     public void mecanumOut() {

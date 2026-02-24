@@ -74,7 +74,7 @@ public class RobotContainer {
             "AlignToTag31",
             new AlignToAprilTagCommand(
                 m_robotDrive,
-                32,     // AprilTag ID
+                9,     // AprilTag ID
                 3.0    // timeout
             )
         );
@@ -187,7 +187,7 @@ public class RobotContainer {
     
     //Button 11 → Launchers On
     new JoystickButton(operatorController, 11)
-    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.65), m_launcher));
+    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.7), m_launcher));
 
     //Button 12 → Launchers Off
     new JoystickButton(operatorController, 12)
@@ -204,7 +204,7 @@ public class RobotContainer {
     double steeringKp = 0.5;
 
     // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
-    int targetAprilTagID = 15;
+    int targetAprilTagID = 9;
 
  new JoystickButton(operatorController, 8)
         .whileTrue(new RunCommand(
@@ -245,7 +245,7 @@ public class RobotContainer {
             m_robotDrive
         ));
 
-    int[] VALID_TAGS = {15,31,12};
+    int[] VALID_TAGS = {9};
 
 
 
