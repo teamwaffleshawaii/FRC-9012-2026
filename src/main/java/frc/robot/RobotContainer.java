@@ -187,7 +187,7 @@ public class RobotContainer {
     
     //Button 11 → Launchers On
     new JoystickButton(operatorController, 11)
-    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.7), m_launcher));
+    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.8), m_launcher));
 
     //Button 12 → Launchers Off
     new JoystickButton(operatorController, 12)
@@ -204,7 +204,7 @@ public class RobotContainer {
     double steeringKp = 0.5;
 
     // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
-    int targetAprilTagID = 9;
+    int targetAprilTagID = 32;
 
  new JoystickButton(operatorController, 8)
         .whileTrue(new RunCommand(
@@ -216,7 +216,11 @@ public class RobotContainer {
                     m_robotDrive.drive(0, 0, 0, false);
                     return;
                 }
-
+                int seenID = (int) LimelightHelpers.getFiducialID("limelight");
+                if (seenID != 32) {
+                    m_launcher.stopLauncher();
+                    return;
+                }
                 // botPose array: [x, y, z, roll, pitch, yaw]
                 double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
 
@@ -245,42 +249,55 @@ public class RobotContainer {
             m_robotDrive
         ));
 
-    int[] VALID_TAGS = {9};
+    int[] VALID_TAGS = {32};
 
 
 
     new JoystickButton(operatorController, 9).whileTrue(new RunCommand(() -> {
+      
 
-    boolean hasTarget = LimelightHelpers.getTV("limelight");
+    LimelightHelpers.SetFiducialIDFiltersOverride("limelight", VALID_TAGS);
+                    //int tagID = (int) LimelightHelpers.getFiducialID("limelight");
+                    boolean hasTarget = LimelightHelpers.getTV("limelight");
 
-    if (!hasTarget) {
-        m_launcher.stopLauncher();
-        return;
-    }
+                    boolean validTag =
+                            hasTarget; // &&
+                            //VALID_TAGS.contains(tagID);
 
-    double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
-    double tz = Math.abs(botPose[2]);
 
-    // ----- Tunable Constants -----
-    double tzMin = 0.8;   // ~2.5 ft
-    double tzMax = 3.0;   // ~10 ft
-    double powerMin = 0.30;
-    double powerMax = 0.65;
+                    if (validTag) {
 
-    double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);
+                        double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
+                        double tz = Math.abs(botPose[2]);
 
-    double motorPower =
-            powerMin +
-            (clampedTz - tzMin) * (powerMax - powerMin) / (tzMax - tzMin);
+                        if (tz > 0.0) {
+                            double motorPower;
 
-    m_launcher.setPower(motorPower);
+                           double tzMin = 0.8;   // ~2.5 ft
+                            double tzMax = 3.0;   // ~10 ft
+                            double powerMin = 0.30;
+                            double powerMax = 0.65;
 
-    SmartDashboard.putNumber("Shooter Distance (m)", tz);
-    SmartDashboard.putNumber("Shooter Power", motorPower);
+                            double clampedTz = Math.max(tzMin, Math.min(tzMax, tz));
 
+                            motorPower = powerMin + (clampedTz - tzMin) * (powerMax - powerMin) / (tzMax - tzMin);
+
+                            m_launcher.setPower(motorPower);
+
+                            SmartDashboard.putNumber("Launcher Distance: ", tz);
+                            SmartDashboard.putNumber("Launch Power: ", motorPower);
+                            SmartDashboard.putNumber("Launcher Velocityy", m_launcher.getCachedPower());
+                            return;
+                        }
+                    }
+                    // No valid target → HOLD LAST POWER
+                    m_launcher.holdLastPower();
 }, m_launcher));}
                 
+ 
 
+                  
+          
     //Data collected from February 12th
     //86" away, 65 percent
     //103" away, 70 percent
