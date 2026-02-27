@@ -50,7 +50,7 @@ import java.util.List;
 public class RobotContainer {
 
   // The robot's subsystems
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
   private final TransferSubsystem m_Transfer = new TransferSubsystem();
@@ -140,11 +140,16 @@ public class RobotContainer {
 
     //Button 1 → Intake Pivot UP
     new JoystickButton(operatorController, 1)
-      .onTrue(new InstantCommand(m_intake::pivotUp, m_intake));
+      .onTrue(new InstantCommand(m_intake::pivotUp, m_intake))
+      .onTrue(new InstantCommand(m_intake::hopperIn, m_intake))
+      ;
 
     //Button 2 → Intake Pivot DOWN
     new JoystickButton(operatorController, 2)
-      .onTrue(new InstantCommand(m_intake::pivotDown, m_intake));
+      .onTrue(new InstantCommand(m_intake::pivotDown, m_intake))
+      .onTrue(new InstantCommand(m_intake::hopperOut, m_intake))
+      ;
+      
 
     //Button 3 → Intake
     new JoystickButton(operatorController, 3)
@@ -185,9 +190,11 @@ public class RobotContainer {
     .onFalse(new InstantCommand(() -> m_Transfer.mecanumStop(), m_Transfer))
     .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake));
     
-    //Button 11 → Launchers On
+   // Button 11 → Launchers On
     new JoystickButton(operatorController, 11)
-    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.7), m_launcher));
+
+    .onTrue(new InstantCommand(() -> m_launcher.runLauncher(0.75), m_launcher));
+    
 
     //Button 12 → Launchers Off
     new JoystickButton(operatorController, 12)
@@ -204,7 +211,7 @@ public class RobotContainer {
     double steeringKp = 0.5;
 
     // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
-    int targetAprilTagID = 9;
+    int targetAprilTagID = 15;
 
  new JoystickButton(operatorController, 8)
         .whileTrue(new RunCommand(
@@ -245,7 +252,7 @@ public class RobotContainer {
             m_robotDrive
         ));
 
-    int[] VALID_TAGS = {9};
+    int[] VALID_TAGS = {32};
 
 
 
@@ -261,22 +268,30 @@ public class RobotContainer {
     double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
     double tz = Math.abs(botPose[2]);
 
-    // ----- Tunable Constants -----
-    double tzMin = 0.8;   // ~2.5 ft
-    double tzMax = 3.0;   // ~10 ft
-    double powerMin = 0.30;
-    double powerMax = 0.65;
+    // ----- Tunable Constants (RPM based) -----
+    double tzMin = 0.8;    // ~2.5 ft
+    double tzMax = 2.0;    // ~10 ft
 
+    // Adjust these based on your specific launcher geometry/distance requirements
+    double rpmMin = 2500.0; // Minimum RPM for close shots
+    double rpmMax = 5800.0; // Maximum RPM for far shots
+
+    // 1. Clamp the distance so the math doesn't break outside your range
     double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);
 
-    double motorPower =
-            powerMin +
-            (clampedTz - tzMin) * (powerMax - powerMin) / (tzMax - tzMin);
+    // 2. Linear Interpolation (LERP) to find target RPM based on distance
+    double targetRPM = 
+            rpmMin + 
+            (clampedTz - tzMin) * (rpmMax - rpmMin) / (tzMax - tzMin);
 
-    m_launcher.setPower(motorPower);
+    // 3. Send to your subsystem (using the method created in the previous step)
+    m_launcher.runLauncher(targetRPM);
+    //m_launcher.setTargetVelocity(targetRPM);
+
 
     SmartDashboard.putNumber("Shooter Distance (m)", tz);
-    SmartDashboard.putNumber("Shooter Power", motorPower);
+    SmartDashboard.putNumber("Shooter Distance (ft)", (tz*3.28084));
+    SmartDashboard.putNumber("Shooter RPM", targetRPM);
 
 }, m_launcher));}
                 

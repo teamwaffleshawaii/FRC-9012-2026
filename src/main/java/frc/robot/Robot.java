@@ -4,16 +4,17 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.LauncherSubsystem;
-import frc.robot.subsystems.TransferSubsystem;
+import frc.robot.commands.AlignToAprilTagCommand;
+import frc.robot.Constants;
 
 
 /**
@@ -26,7 +27,8 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-  
+
+  private final XboxController m_driverController = new XboxController(0);
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -37,6 +39,10 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    //LimelightHelpers.setPriorityTagID("limelight", 31);
+
+
   }
 
   /**
@@ -54,6 +60,14 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
+    double omegaRps = Units.degreesToRotations(m_robotContainer.m_robotDrive.getTurnRate());
+    var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+
+    if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
+        m_robotContainer.m_robotDrive.resetOdometry(llMeasurement.pose);
+    }
+  
+
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -66,8 +80,6 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",
      * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
@@ -75,17 +87,18 @@ public class Robot extends TimedRobot {
      * autonomousCommand = new ExampleCommand(); break; }
      */
 
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
+        m_autonomousCommand.schedule();
     }
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-
-    
+    SmartDashboard.putNumber("Gyro Heading", m_robotContainer.m_robotDrive.getHeading());
   }
 
   @Override
@@ -94,26 +107,32 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-  
-}
+  }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    double currentDistance = LimelightHelpers.getBotPose_TargetSpace("limelight")[2];
 
-    //SmartDashboard.putNumber("Launcher Left", m_launcher.launcherMotor1.)
-    
+    SmartDashboard.putNumber("Distance from AprilTag", currentDistance);
+    // botPose array: [x, y, z, roll, pitch, yaw]
+    double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
 
+    double currentStrafeX = botPose[0];    // Left/Right
+    double currentDistanceZ = botPose[2]; // Forward/Back
+    double currentYaw = botPose[4];      // Rotation relative to AprilTag
+
+    SmartDashboard.putNumber("TX: ", currentStrafeX);
+    SmartDashboard.putNumber("TZ: ", currentDistanceZ);
+    SmartDashboard.putNumber("Yaw: ", currentYaw);
   }
 
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
-    
     CommandScheduler.getInstance().cancelAll();
   }
 

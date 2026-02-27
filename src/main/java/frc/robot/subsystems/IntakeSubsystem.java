@@ -31,6 +31,14 @@ public class IntakeSubsystem extends SubsystemBase {
             1  // reverse channel
         );
 
+         private final DoubleSolenoid hopperSolenoid =
+        new DoubleSolenoid(
+            2, // REV Pneumatic Hub CAN ID
+            PneumaticsModuleType.REVPH,
+            2, // forward channel
+            3  // reverse channel
+        );
+
     // ==============================
     // Constructor
     // ==============================
@@ -91,6 +99,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void stopPivot() {
         pivotSolenoid.set(DoubleSolenoid.Value.kOff);
+    }
+    public void hopperOut(){
+        hopperSolenoid.set(DoubleSolenoid.Value.kForward);
+    }
+        public void hopperIn(){
+        hopperSolenoid.set(DoubleSolenoid.Value.kReverse);
     }
 
     public void togglePivot() {
