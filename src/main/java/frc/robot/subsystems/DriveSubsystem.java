@@ -4,6 +4,11 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.controllers.PPLTVController;
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.hal.FRCNetComm.tInstances;
@@ -16,10 +21,13 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
+
+   
   // Create MAXSwerveModules
   private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
       DriveConstants.kFrontLeftDrivingCanId,
@@ -58,8 +66,32 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
-    // Usage reporting for MAXSwerve template
-    HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
+ HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
+
+    RobotConfig config;
+    try {
+      config = RobotConfig.fromGUISettings();
+      
+      AutoBuilder.configure(
+          this::getPose, 
+          this::resetOdometry,
+          this::getRobotRelativeSpeeds, 
+          (speeds, feedforwards) -> driveRobotRelative(speeds), 
+          new PPHolonomicDriveController(
+              new PIDConstants(1.0, 0.0, 0.0), 
+              new PIDConstants(1.0, 0.0, 0.0)
+          ),
+          config, 
+          () -> {
+              var alliance = DriverStation.getAlliance();
+              return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
+          },
+          this
+      );
+    } catch (Exception e) {
+      DriverStation.reportError("Failed to load PathPlanner config", e.getStackTrace());
+    }
+   
   }
 
   @Override
@@ -168,6 +200,25 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
+  public ChassisSpeeds getRobotRelativeSpeeds() {
+  return DriveConstants.kDriveKinematics.toChassisSpeeds(
+      m_frontLeft.getState(),
+      m_frontRight.getState(),
+      m_rearLeft.getState(),
+      m_rearRight.getState());
+}
+
+public void driveRobotRelative(ChassisSpeeds speeds) {
+  var moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+
+  SwerveDriveKinematics.desaturateWheelSpeeds(
+      moduleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+
+  m_frontLeft.setDesiredState(moduleStates[0]);
+  m_frontRight.setDesiredState(moduleStates[1]);
+  m_rearLeft.setDesiredState(moduleStates[2]);
+  m_rearRight.setDesiredState(moduleStates[3]);
+}
   /**
    * Returns the heading of the robot.
    *

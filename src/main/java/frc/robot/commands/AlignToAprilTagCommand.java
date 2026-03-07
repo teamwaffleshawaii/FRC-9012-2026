@@ -46,13 +46,13 @@ public class AlignToAprilTagCommand extends Command {
     @Override
     public void execute() {
 
-        if (!LimelightHelpers.getTV("limelight")) {
+        if (!LimelightHelpers.getTV("limelight-launch")) {
             drive.drive(0, 0, 0, false);
             return;
         }
 
         // botPose: [x, y, z, roll, pitch, yaw]
-        double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
+        double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
 
         double currentStrafeX   = botPose[0];
         double currentDistanceZ = botPose[2];
@@ -85,8 +85,8 @@ public class AlignToAprilTagCommand extends Command {
         boolean timedOut = timer.hasElapsed(timeoutSeconds);
 
         // End early if fully aligned
-        if (LimelightHelpers.getTV("limelight")) {
-            double[] pose = LimelightHelpers.getBotPose_TargetSpace("limelight");
+        if (LimelightHelpers.getTV("limelight-launch")) {
+            double[] pose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
             boolean aligned =
                 Math.abs(pose[2] + targetDistanceMetersTZ) < 0.03 &&
                 Math.abs(pose[0] + targetDistanceMetersTX) < 0.03 &&

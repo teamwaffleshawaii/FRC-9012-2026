@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
-    //LimelightHelpers.setPriorityTagID("limelight", 31);
+    //LimelightHelpers.setPriorityTagID("limelight-launch", 31);
 
 
   }
@@ -61,7 +61,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     double omegaRps = Units.degreesToRotations(m_robotContainer.m_robotDrive.getTurnRate());
-    var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+    var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-launch");
 
     if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
         m_robotContainer.m_robotDrive.resetOdometry(llMeasurement.pose);
@@ -115,11 +115,11 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    double currentDistance = LimelightHelpers.getBotPose_TargetSpace("limelight")[2];
+    double currentDistance = LimelightHelpers.getBotPose_TargetSpace("limelight-launch")[2];
 
     SmartDashboard.putNumber("Distance from AprilTag", currentDistance);
     // botPose array: [x, y, z, roll, pitch, yaw]
-    double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight");
+    double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
 
     double currentStrafeX = botPose[0];    // Left/Right
     double currentDistanceZ = botPose[2]; // Forward/Back

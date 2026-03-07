@@ -27,8 +27,8 @@ public class IntakeSubsystem extends SubsystemBase {
         new DoubleSolenoid(
             2, // REV Pneumatic Hub CAN ID
             PneumaticsModuleType.REVPH,
-            0, // forward channel
-            1  // reverse channel
+            1, // forward channel
+            0  // reverse channel
         );
 
          private final DoubleSolenoid hopperSolenoid =
@@ -72,13 +72,17 @@ public class IntakeSubsystem extends SubsystemBase {
         runIntake(0.8);
     }
 
+    public void intakeInFullPower() {
+        runIntake(1.0);
+    }
+
     public void intakeOut() {
         runIntake(-0.8);
     }
 
     //For during transfer to prevent FUELs from being stuck by the intake
     public void intakeTransfer() {
-        runIntake(0.3);
+        runIntake(-0.15);
     }
 
     public void intakeStop() {
@@ -103,13 +107,19 @@ public class IntakeSubsystem extends SubsystemBase {
     public void hopperOut(){
         hopperSolenoid.set(DoubleSolenoid.Value.kForward);
     }
-        public void hopperIn(){
+    
+    public void hopperIn(){
         hopperSolenoid.set(DoubleSolenoid.Value.kReverse);
     }
+
+    public boolean isHopperOut() {
+    return hopperSolenoid.get() == DoubleSolenoid.Value.kForward;
+    }  
 
     public void togglePivot() {
         pivotSolenoid.toggle();
     }
+
 
     @Override
     public void periodic() {
