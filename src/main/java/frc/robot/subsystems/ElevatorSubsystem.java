@@ -112,7 +112,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         // SmartDashboard.putNumber("Right Elevator", m_elevatorR.getEncoder().getPosition());
     }
 }
-
 /* FOR TUNING OF ELEVATOR
 package frc.robot.subsystems;
 

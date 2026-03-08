@@ -22,6 +22,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -53,6 +55,8 @@ public class DriveSubsystem extends SubsystemBase {
   //private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
   AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
+  private final Field2d m_field = new Field2d();
+
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
@@ -66,7 +70,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
- HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
+  HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
+
+  SmartDashboard.putData("Field", m_field);
 
     RobotConfig config;
     try {
@@ -219,6 +225,11 @@ public void driveRobotRelative(ChassisSpeeds speeds) {
   m_rearLeft.setDesiredState(moduleStates[2]);
   m_rearRight.setDesiredState(moduleStates[3]);
 }
+public Rotation2d getRotation2d() {
+    // NavX getAngle() is continuous and CW positive; 
+    // we negate it to make it CCW positive for WPILib.
+    return Rotation2d.fromDegrees(-m_gyro.getAngle());
+}
   /**
    * Returns the heading of the robot.
    *
@@ -236,4 +247,6 @@ public void driveRobotRelative(ChassisSpeeds speeds) {
   public double getTurnRate() {
     return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
+  
 }
+

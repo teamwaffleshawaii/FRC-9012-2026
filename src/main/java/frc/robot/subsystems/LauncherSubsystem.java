@@ -74,7 +74,7 @@ public class LauncherSubsystem extends SubsystemBase {
           double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
           tz = Math.abs(botPose[2]);
 
-          double tzMin = 1.2; double tzMax = 3.0;
+          double tzMin = 0.1; double tzMax = 3.0;
           double rpmMin = 0.0; double rpmMax = 6784.0; // CHECK REV HARDWARE CLIENT MOTOR RPM (VELOCITY)
 
           double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);

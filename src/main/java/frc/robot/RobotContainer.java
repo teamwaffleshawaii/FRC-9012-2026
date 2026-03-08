@@ -41,6 +41,10 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 import java.util.List;
 
@@ -54,7 +58,7 @@ public class RobotContainer {
     
 
   // The robot's subsystems
-  final DriveSubsystem m_robotDrive = new DriveSubsystem();
+   final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
   private final TransferSubsystem m_Transfer = new TransferSubsystem();
@@ -74,29 +78,66 @@ public class RobotContainer {
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
+
   public RobotContainer() {
-     
 
         // Register Named Commands
         // NamedCommands.registerCommand("Auto", DriveSubsystem.autoBalanceCommand());
         // NamedCommands.registerCommand("exampleCommand", exampleSubsystem.exampleCommand());
         // NamedCommands.registerCommand("someOtherCommand", new SomeOtherCommand());
 
-        // Do all other initialization
-        configureButtonBindings();
-     NamedCommands.registerCommand(
+    NamedCommands.registerCommand(
       
-            "AlignT4oTag31",
+            "AlignToTag31",
             new AlignToAprilTagCommand(
                 m_robotDrive,
                 9,     // AprilTag ID
                 3.0    // timeout
-            )
+            )   
+    );
 
-           
-        );
+
+    NamedCommands.registerCommand("IntakeDown", new SequentialCommandGroup(
+        new InstantCommand(m_intake::hopperOut, m_intake),
+        new WaitCommand(0.15),
+        new InstantCommand(m_intake::pivotDown, m_intake)
+    ));
+    
+    // Action: Intake Up/Store (Button 1 logic)
+    // NamedCommands.registerCommand("IntakeUp", new ParallelCommandGroup(
+    //     new StartEndCommand(m_intake::intakeInFullPower, m_intake::intakeStop).withTimeout(3.0),
+    //     new SequentialCommandGroup(
+    //         new InstantCommand(m_intake::pivotUp),
+    //         new WaitCommand(0.15),
+    //         new InstantCommand(m_intake::hopperIn)
+    //     )
+    // ));
+
+    // Action: Spin up and Launch (Button 11 + 10 logic)
+    NamedCommands.registerCommand("LaunchSequence", new SequentialCommandGroup(
+        new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher),
+        new WaitCommand(0.5), // Allow spin up time
+        new ParallelCommandGroup(
+            new InstantCommand(m_Transfer::transferIn, m_Transfer),
+            new InstantCommand(m_Transfer::mecanumIn, m_Transfer),
+            new InstantCommand(m_intake::intakeTransfer, m_intake)
+        )
+    ));
+
+    // // Action: Stop all intake/launcher motors
+    // NamedCommands.registerCommand("StopAll", new ParallelCommandGroup(
+    //     new InstantCommand(m_launcher::stopLauncher, m_launcher),
+    //     new InstantCommand(m_Transfer::transferStop, m_Transfer),
+    //     new InstantCommand(m_intake::intakeStop, m_intake),
+    //     new InstantCommand(m_Transfer::mecanumStop, m_Transfer)
+    //));
+
         
-        autoChooser = AutoBuilder.buildAutoChooser();
+    
+    // Do all other initialization
+    configureButtonBindings();
+
+    autoChooser = AutoBuilder.buildAutoChooser();
 
     // Another option that allows you to specify the default auto by its name
     // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");

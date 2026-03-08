@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.5197432239657629,
-        "y": 6.228102710413695
+        "x": 4.456228915662652,
+        "y": 7.433518072289157
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.3117306503813013,
-        "y": 6.3667777594700015
+        "x": 5.3982964670102564,
+        "y": 7.433518072289157
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.031611982881596,
-        "y": 7.560784593437946
+        "x": 6.445072289156626,
+        "y": 7.171253012048193
       },
       "prevControl": {
-        "x": 2.020627674750356,
-        "y": 7.677232524964338
+        "x": 5.80033734939759,
+        "y": 7.41166265060241
+      },
+      "nextControl": {
+        "x": 7.060523444484943,
+        "y": 6.941762750739328
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.439493975903615,
+        "y": 6.275180722891566
+      },
+      "prevControl": {
+        "x": 7.262717280606979,
+        "y": 6.4519574181882025
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "FuelPickup1"
     }
   ],
   "rotationTargets": [],
@@ -33,8 +49,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 7.22,
+    "maxAcceleration": 20.15,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,7 +58,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -171.14569181167818
+    "rotation": -42.92996934695885
   },
   "reversed": false,
   "folder": null,

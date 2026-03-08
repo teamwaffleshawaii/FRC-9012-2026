@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.AlignToAprilTagCommand;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.Constants;
 
 
@@ -66,6 +67,11 @@ public class Robot extends TimedRobot {
     if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
         m_robotContainer.m_robotDrive.resetOdometry(llMeasurement.pose);
     }
+
+    
+    SmartDashboard.putNumber("Gyro Heading", m_robotContainer.m_robotDrive.getHeading());
+
+    
   
 
   }
@@ -88,6 +94,7 @@ public class Robot extends TimedRobot {
      */
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
     
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -98,7 +105,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    SmartDashboard.putNumber("Gyro Heading", m_robotContainer.m_robotDrive.getHeading());
   }
 
   @Override
