@@ -1,5 +1,8 @@
 # 9012 Changelog
 
+## 2026-03-07
+- What did Logan & Bo do and why is the robot code not running?
+
 ## 2026-02-18
 
 - Added elevator subsystem
