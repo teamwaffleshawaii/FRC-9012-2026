@@ -95,34 +95,33 @@ public class RobotContainer {
                 3.0    // timeout
             )   
     );
-
-
-    NamedCommands.registerCommand("IntakeDown", new SequentialCommandGroup(
-        new InstantCommand(m_intake::hopperOut, m_intake),
-        new WaitCommand(0.15),
+ 
+    NamedCommands.registerCommand("IntakeDown",
+    new SequentialCommandGroup(
+        new RunCommand(m_intake::hopperOut, m_intake).withTimeout(0.15),
         new InstantCommand(m_intake::pivotDown, m_intake)
-    ));
+));
     
     // Action: Intake Up/Store (Button 1 logic)
-    // NamedCommands.registerCommand("IntakeUp", new ParallelCommandGroup(
-    //     new StartEndCommand(m_intake::intakeInFullPower, m_intake::intakeStop).withTimeout(3.0),
-    //     new SequentialCommandGroup(
-    //         new InstantCommand(m_intake::pivotUp),
-    //         new WaitCommand(0.15),
-    //         new InstantCommand(m_intake::hopperIn)
-    //     )
-    // ));
-
-    // Action: Spin up and Launch (Button 11 + 10 logic)
-    NamedCommands.registerCommand("LaunchSequence", new SequentialCommandGroup(
-        new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher),
-        new WaitCommand(0.5), // Allow spin up time
-        new ParallelCommandGroup(
-            new InstantCommand(m_Transfer::transferIn, m_Transfer),
-            new InstantCommand(m_Transfer::mecanumIn, m_Transfer),
-            new InstantCommand(m_intake::intakeTransfer, m_intake)
+    NamedCommands.registerCommand("IntakeUp", new ParallelCommandGroup(
+        new StartEndCommand(m_intake::intakeInFullPower, m_intake::intakeStop).withTimeout(3.0),
+        new SequentialCommandGroup(
+            new InstantCommand(m_intake::pivotUp),
+            new WaitCommand(0.15),
+            new InstantCommand(m_intake::hopperIn)
         )
     ));
+
+    // Action: Spin up and Launch (Button 11 + 10 logic)
+    // NamedCommands.registerCommand("LaunchSequence", new SequentialCommandGroup(
+    //     new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher),
+    //     new WaitCommand(0.5), // Allow spin up time
+    //     new ParallelCommandGroup(
+    //         new InstantCommand(m_Transfer::transferIn, m_Transfer),
+    //         new InstantCommand(m_Transfer::mecanumIn, m_Transfer),
+    //         new InstantCommand(m_intake::intakeTransfer, m_intake)
+    //     )
+    // ));
 
     // // Action: Stop all intake/launcher motors
     // NamedCommands.registerCommand("StopAll", new ParallelCommandGroup(
@@ -141,7 +140,9 @@ public class RobotContainer {
 
     // Another option that allows you to specify the default auto by its name
     // autoChooser = AutoBuilder.buildAutoChooser("My Default Auto");
+    // register NamedCommands FIRST
 
+   
     SmartDashboard.putData("Auto Chooser", autoChooser);
     // Configure the button bindings
     configureButtonBindings();
@@ -494,6 +495,7 @@ public class RobotContainer {
     return Math.abs(value) > 0.08 ? value : 0.0;
     
 }
+
 
   public Command getAutonomousCommand() { 
     

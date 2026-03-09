@@ -3,7 +3,26 @@
   "command": {
     "type": "sequential",
     "data": {
-      "commands": []
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeDown"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeIn"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "FuelGoBackLeft"
+          }
+        }
+      ]
     }
   },
   "resetOdom": true,
