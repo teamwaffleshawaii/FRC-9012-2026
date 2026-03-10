@@ -34,12 +34,6 @@
           "data": {
             "name": "IntakeStop"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": null
-          }
         }
       ]
     }

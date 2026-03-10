@@ -88,10 +88,10 @@ public class RobotContainer {
 
     NamedCommands.registerCommand(
       
-            "AlignToTag31",
+            "AlignToTag10",
             new AlignToAprilTagCommand(
                 m_robotDrive,
-                9,     // AprilTag ID
+                6,     // AprilTag ID
                 3.0    // timeout
             )   
     );
@@ -272,10 +272,10 @@ public class RobotContainer {
       .onTrue(
         new ParallelCommandGroup(
             // Timeline A: Motors
-            new StartEndCommand(
-              m_intake::intakeInFullPower,
-              m_intake::intakeStop
-            ).withTimeout(3.0),
+            // new StartEndCommand(
+            //   m_intake::intakeIn,
+            //   m_intake::intakeStop
+            // ).withTimeout(3.0),
             
             // Timeline B: Pneumatics
             new SequentialCommandGroup(
@@ -357,8 +357,8 @@ public class RobotContainer {
       ));
     
    // Button 11 → Launchers On
-    new JoystickButton(operatorController, 20)
-    .onTrue(new InstantCommand(() -> m_launcher.runLauncherPower(.7), m_launcher));
+    new JoystickButton(operatorController, 11)
+    .onTrue(new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher));
     
 
     //Button 12 → Launchers Off
@@ -422,7 +422,7 @@ public class RobotContainer {
 */
 
     // BUTTON NUMBER 9 (right Apr-Tag) sets launcher rpm to distance value of apriltag
-    new JoystickButton(operatorController, 11).whileTrue(new RunCommand(() -> {
+    new JoystickButton(operatorController, 20).whileTrue(new RunCommand(() -> {
 
             LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", LauncherSubsystem.validTags);
             m_launcher.runLauncher(m_launcher.getCalculatedRPM());
