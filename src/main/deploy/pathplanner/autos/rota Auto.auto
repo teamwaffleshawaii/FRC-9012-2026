@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "FuelPickupLeft"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "FuelGoBackLeft"
+            "pathName": "Rota Path"
           }
         }
       ]

@@ -215,7 +215,7 @@ public class RobotContainer {
     // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
     int targetAprilTagID = 10;
 
-    new JoystickButton(m_driverController, 1)
+    new JoystickButton(m_driverController, 111)
             .whileTrue(new RunCommand(
                 () -> {
 
@@ -224,6 +224,7 @@ public class RobotContainer {
                     if (seenTagID != targetAprilTagID) {
                         m_leds.setSolidColor(255, 0, 0);
                         m_robotDrive.drive(0, 0, 0, false);
+                         m_leds.setSolidColor(0, 255, 0);
                         return;
                     }
                     int seenID = (int) LimelightHelpers.getFiducialID("limelight-launch");
@@ -231,8 +232,8 @@ public class RobotContainer {
                         m_launcher.stopLauncher();
                         return;
                     }
-                    // botPose array: [x, y, z, roll, pitch, yaw]
-                     m_leds.setSolidColor(0, 255, 0);
+                 //   botPose array: [x, y, z, roll, pitch, yaw]
+                    
                     double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
 
                     double currentStrafeX  = botPose[0]; // Left/Right
@@ -335,13 +336,16 @@ public class RobotContainer {
   
     //Button 9 -> Hopper In and Out
     new JoystickButton(operatorController, 9)
-      .onTrue(new InstantCommand(() -> {
-          if (m_intake.isHopperOut()) {
-              m_intake.hopperIn();
-          } else {
-              m_intake.hopperOut();
-          }
-      }, m_intake));
+
+      .onTrue(new InstantCommand(() -> m_launcher.runLauncherPower(-0.7), m_launcher));
+    
+      // .onTrue(new InstantCommand(() -> {
+      //     if (m_intake.isHopperOut()) {
+      //         m_intake.hopperIn();
+      //     } else {
+      //         m_intake.hopperOut();
+      //     }
+      // }, m_intake));
 
     //Button 10 → Launch FUELs (Transfer on)
     new JoystickButton(operatorController, 10)
@@ -357,7 +361,7 @@ public class RobotContainer {
       ));
     
    // Button 11 → Launchers On
-    new JoystickButton(operatorController, 11)
+    new JoystickButton(operatorController, 11) //11
     .onTrue(new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher));
     
 
