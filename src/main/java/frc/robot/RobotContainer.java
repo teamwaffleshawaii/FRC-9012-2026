@@ -215,7 +215,7 @@ public class RobotContainer {
     // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
     int targetAprilTagID = 10;
 
-    new JoystickButton(m_driverController, 111)
+    new JoystickButton(m_driverController, 9)
             .whileTrue(new RunCommand(
                 () -> {
 
@@ -262,10 +262,6 @@ public class RobotContainer {
             )
             );
 
-   
-
-
-
     //Add button bindings here:
 
     //Button 1 → Intake Pivot UP
@@ -296,29 +292,23 @@ public class RobotContainer {
             new InstantCommand(m_intake::pivotDown, m_intake) // Put intake down
             )
           );
-        
-    
       
     //Button 3 → Intake
     new JoystickButton(operatorController, 3)
       .onTrue(new InstantCommand(m_intake::intakeIn, m_intake))
-     .onTrue(new InstantCommand(m_Transfer::transferInSlow, m_Transfer))
-     .onTrue(new InstantCommand(m_Transfer::mecanumOut, m_Transfer))
+      .onTrue(new InstantCommand(m_Transfer::transferInSlow, m_Transfer))
+      .onTrue(new InstantCommand(m_Transfer::mecanumOut, m_Transfer))
       .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake))
       .onFalse(new InstantCommand(m_Transfer::transferStop, m_Transfer))
-     .onFalse(new InstantCommand(m_Transfer::mecanumStop, m_Transfer));
+      .onFalse(new InstantCommand(m_Transfer::mecanumStop, m_Transfer));
 
     //Button 4 → Elevator up MAX
     new JoystickButton(operatorController, 4)
-   // .onTrue(new InstantCommand(m_intake::pivotDown, m_intake))
-      .onTrue(new InstantCommand(m_elevator::goTop, m_elevator))
-      ;
+      .onTrue(new InstantCommand(m_elevator::goTop, m_elevator));
 
     //Button 5 → Elevator down MIN
     new JoystickButton(operatorController, 5)
-    //.onTrue(new InstantCommand(m_intake::pivotUp, m_intake))
-      .onTrue(new InstantCommand(m_elevator::goBottom, m_elevator))
-      ;
+      .onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
       
     //Button 6 → Elevator up manual
     new JoystickButton(operatorController, 6)
@@ -330,22 +320,12 @@ public class RobotContainer {
       .whileTrue(new RunCommand(() -> 
       m_elevator.adjustPosition(-1), m_elevator));
     
+    //Button 8 → Reverse intake (safety)
     new JoystickButton(operatorController, 8)
       .whileTrue(new InstantCommand(m_intake::intakeOut, m_intake));
-
-  
-    //Button 9 -> Hopper In and Out
-    new JoystickButton(operatorController, 9)
-
-      .onTrue(new InstantCommand(() -> m_launcher.runLauncherPower(-0.7), m_launcher));
     
-      // .onTrue(new InstantCommand(() -> {
-      //     if (m_intake.isHopperOut()) {
-      //         m_intake.hopperIn();
-      //     } else {
-      //         m_intake.hopperOut();
-      //     }
-      // }, m_intake));
+    //Button 9 → Reverse transfer (safety)
+    //Yet to bad added
 
     //Button 10 → Launch FUELs (Transfer on)
     new JoystickButton(operatorController, 10)
@@ -426,7 +406,7 @@ public class RobotContainer {
 */
 
     // BUTTON NUMBER 9 (right Apr-Tag) sets launcher rpm to distance value of apriltag
-    new JoystickButton(operatorController, 20).whileTrue(new RunCommand(() -> {
+    new JoystickButton(operatorController, 9).whileTrue(new RunCommand(() -> {
 
             LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", LauncherSubsystem.validTags);
             m_launcher.runLauncher(m_launcher.getCalculatedRPM());
@@ -440,7 +420,7 @@ public class RobotContainer {
 
                       
 
-                      
+                  
 /* 
     new JoystickButton(operatorController, 9).whileTrue(new RunCommand(() -> {
         boolean hasTarget = LimelightHelpers.getTV("limelight-launch");
@@ -482,11 +462,6 @@ public class RobotContainer {
 
   
   }
-      
-    //Data collected from February 12th
-    //86" away, 65 percent
-    //103" away, 70 percent
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
