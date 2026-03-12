@@ -8,7 +8,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.controllers.PPLTVController;
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.hal.FRCNetComm.tInstances;
@@ -60,7 +59,7 @@ public class DriveSubsystem extends SubsystemBase {
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
-      Rotation2d.fromDegrees(m_gyro.getYaw()),
+      getRotation2d(),
       new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -85,7 +84,7 @@ public class DriveSubsystem extends SubsystemBase {
           (speeds, feedforwards) -> driveRobotRelative(speeds), 
           new PPHolonomicDriveController(
               new PIDConstants(5.0, 0.0, 0.0), 
-              new PIDConstants(5.0, 0.0, 0.0)
+              new PIDConstants(15.0, 0.0, 0.0)
           ),
           config, 
           () -> {
@@ -104,7 +103,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic block
     m_odometry.update(
-        Rotation2d.fromDegrees(m_gyro.getYaw()),
+        getRotation2d(),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -129,7 +128,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        Rotation2d.fromDegrees(m_gyro.getYaw()),
+        getRotation2d(),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -157,7 +156,7 @@ public class DriveSubsystem extends SubsystemBase {
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
-                Rotation2d.fromDegrees(-m_gyro.getYaw()))
+                getRotation2d())
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
@@ -226,10 +225,9 @@ public void driveRobotRelative(ChassisSpeeds speeds) {
   m_rearRight.setDesiredState(moduleStates[3]);
 }
 public Rotation2d getRotation2d() {
-    // NavX getAngle() is continuous and CW positive; 
-    // we negate it to make it CCW positive for WPILib.
-    return Rotation2d.fromDegrees(-m_gyro.getAngle());
+    return Rotation2d.fromDegrees(-m_gyro.getYaw());
 }
+
   /**
    * Returns the heading of the robot.
    *

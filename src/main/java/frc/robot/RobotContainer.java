@@ -30,23 +30,11 @@ import frc.robot.subsystems.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-
-import java.util.List;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -56,6 +44,10 @@ import java.util.List;
  */
 public class RobotContainer {
     
+  private final ProfiledPIDController rotationPID = new ProfiledPIDController(
+    10.0, 0.0, 0.0, AutoConstants.kThetaControllerConstraints
+  );
+
 
   // The robot's subsystems
    final DriveSubsystem m_robotDrive = new DriveSubsystem();
@@ -80,6 +72,9 @@ public class RobotContainer {
    */
 
   public RobotContainer() {
+
+    rotationPID.enableContinuousInput(-180, 180); // crucial for full rotations
+    rotationPID.setTolerance(1.0);                // optional, small deadband
 
         // Register Named Commands
         // NamedCommands.registerCommand("Auto", DriveSubsystem.autoBalanceCommand());
@@ -131,8 +126,6 @@ public class RobotContainer {
     //     new InstantCommand(m_Transfer::mecanumStop, m_Transfer)
     //));
 
-        
-    
     // Do all other initialization
     configureButtonBindings();
 
@@ -418,9 +411,6 @@ public class RobotContainer {
                         )
                       );
 
-                      
-
-                  
 /* 
     new JoystickButton(operatorController, 9).whileTrue(new RunCommand(() -> {
         boolean hasTarget = LimelightHelpers.getTV("limelight-launch");
@@ -456,8 +446,6 @@ public class RobotContainer {
         SmartDashboard.putNumber("Shooter RPM", targetRPM);
 
     }, m_launcher)).onFalse(new InstantCommand(m_launcher::stopLauncher, m_launcher)); */
-  
-  
   
 
   
