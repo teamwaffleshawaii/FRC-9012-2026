@@ -73,6 +73,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   SmartDashboard.putData("Field", m_field);
 
+  
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
@@ -84,7 +85,7 @@ public class DriveSubsystem extends SubsystemBase {
           (speeds, feedforwards) -> driveRobotRelative(speeds), 
           new PPHolonomicDriveController(
               new PIDConstants(5.0, 0.0, 0.0), 
-              new PIDConstants(15.0, 0.0, 0.0)
+              new PIDConstants(7.0, 0.0, 0.0)
           ),
           config, 
           () -> {
@@ -110,6 +111,10 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
+
+    // --- LOGGING ROTATION, for troubleshooting Yaw value ---
+    //System.out.println("Robot angle (deg): " + getRotation2d().getDegrees());
+    SmartDashboard.putNumber("Robot Angle", getRotation2d().getDegrees());
   }
 
   /**
@@ -224,7 +229,9 @@ public void driveRobotRelative(ChassisSpeeds speeds) {
   m_rearLeft.setDesiredState(moduleStates[2]);
   m_rearRight.setDesiredState(moduleStates[3]);
 }
+
 public Rotation2d getRotation2d() {
+    // For field-centric driving (teleop)
     return Rotation2d.fromDegrees(-m_gyro.getYaw());
 }
 
@@ -245,6 +252,8 @@ public Rotation2d getRotation2d() {
   public double getTurnRate() {
     return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
+
+  
   
 }
 
