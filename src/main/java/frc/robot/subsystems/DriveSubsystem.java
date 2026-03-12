@@ -85,7 +85,7 @@ public class DriveSubsystem extends SubsystemBase {
           (speeds, feedforwards) -> driveRobotRelative(speeds), 
           new PPHolonomicDriveController(
               new PIDConstants(5.0, 0.0, 0.0), 
-              new PIDConstants(7.0, 0.0, 0.0)
+              new PIDConstants(8.0, 0.0, 1.0)
           ),
           config, 
           () -> {
