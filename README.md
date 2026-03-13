@@ -7,7 +7,6 @@
 * 2 Launchers NEO Vortex (CAN IDs 15, 16)
 * 2 Transfer NEO550 motors (CAN IDs 17, 18)
 * Pneumatic Cylinders 0,1 for Intake pivot
-* Pneumatic Cylinders 2,3 for Hopper
 
 ## MaxSwerve Prerequisites
 
@@ -16,7 +15,7 @@
 
 ## MaxSwerve Configs & Constants
 
-* Drivetrain Gear Max Speed: 7.22 m/s (Theoretical Top Speed)
+* Drivetrain Gear Max Speed: 7.22 m/s (Theoretical Top Speed, use 85% of this for PP)
 * TrackWidth: 22.5 inches
 * DrivingMotor Pinion Teeth: 16T
 * SpurGear Teeth: 20T

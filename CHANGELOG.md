@@ -1,7 +1,8 @@
 # 9012 Changelog
 
-## 2026-03-11
-- Working on pathplanner
+## 2026-03-12
+- Pathplanner turning tuned
+- Removed hopper cylinders to simplify intake movement
 
 ## 2026-02-18
 
