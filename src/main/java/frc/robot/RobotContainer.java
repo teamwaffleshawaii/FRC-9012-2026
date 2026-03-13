@@ -92,21 +92,12 @@ public class RobotContainer {
     );
  
     NamedCommands.registerCommand("IntakeDown",
-        new SequentialCommandGroup(
-            new RunCommand(m_intake::hopperOut, m_intake).withTimeout(0.15),
-            new InstantCommand(m_intake::pivotDown, m_intake)
-        )
-    );
+        new SequentialCommandGroup(new InstantCommand(m_intake::pivotDown, m_intake)));
     
     // Action: Intake Up/Store (Button 1 logic)
     NamedCommands.registerCommand("IntakeUp", new ParallelCommandGroup(
         new StartEndCommand(m_intake::intakeInFullPower, m_intake::intakeStop).withTimeout(3.0),
-        new SequentialCommandGroup(
-            new InstantCommand(m_intake::pivotUp),
-            new WaitCommand(0.15),
-            new InstantCommand(m_intake::hopperIn)
-        )
-    ));
+        new SequentialCommandGroup(new InstantCommand(m_intake::pivotUp))));
 
     // Action: Spin up and Launch (Button 11 + 10 logic)
     // NamedCommands.registerCommand("LaunchSequence", new SequentialCommandGroup(
@@ -258,33 +249,11 @@ public class RobotContainer {
 
     //Button 1 → Intake Pivot UP
     new JoystickButton(operatorController, 1)
-      .onTrue(
-        new ParallelCommandGroup(
-            // Timeline A: Motors
-            // new StartEndCommand(
-            //   m_intake::intakeIn,
-            //   m_intake::intakeStop
-            // ).withTimeout(3.0),
-            
-            // Timeline B: Pneumatics
-            new SequentialCommandGroup(
-              new InstantCommand(m_intake::pivotUp)
-              //new WaitCommand(0.15),
-              //new InstantCommand(m_intake::hopperIn)
-            )
-        )
-      );
+      .onTrue(new SequentialCommandGroup(new InstantCommand(m_intake::pivotUp, m_intake)));
 
     //Button 2 → Intake Pivot DOWN
     new JoystickButton(operatorController, 2)
-      .onTrue(
-          new SequentialCommandGroup(
-              //new InstantCommand(m_intake::hopperOut, m_intake), // retract hopper
-              //new WaitCommand(1),                        // wait 1 second
-              //new InstantCommand(m_intake::hopperIn, m_intake),  // extend hopper
-              new InstantCommand(m_intake::pivotDown, m_intake)  // intake ready
-          )
-      );
+      .onTrue(new SequentialCommandGroup(new InstantCommand(m_intake::pivotDown, m_intake)));
       
     //Button 3 → Intake
     new JoystickButton(operatorController, 3)
@@ -303,15 +272,6 @@ public class RobotContainer {
         )
       );
 
-      /* OLD CODE LOGIC IF ONE ABOVE DOESN"T WORK
-      .onTrue(new InstantCommand(m_intake::intakeIn, m_intake))
-      .onTrue(new InstantCommand(m_transfer::transferInSlow, m_transfer))
-      .onTrue(new InstantCommand(m_transfer::mecanumOut, m_transfer))
-      .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake))
-      .onFalse(new InstantCommand(m_transfer::transferStop, m_transfer))
-      .onFalse(new InstantCommand(m_transfer::mecanumStop, m_transfer));
-      */
-
     //Button 4 → Elevator up MAX
     new JoystickButton(operatorController, 4)
       .onTrue(new InstantCommand(m_elevator::goTop, m_elevator));
@@ -320,10 +280,8 @@ public class RobotContainer {
     new JoystickButton(operatorController, 5)
       .onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
       
-
-
-    double elevatorManualSpeedUp = 1;
-    double elevatorManualSpeedDown = 1; // do not put minus in this
+      double elevatorManualSpeedUp = 1;
+      double elevatorManualSpeedDown = 1; // do not put minus in this
     
     //Button 6 → Elevator up manual
     new JoystickButton(operatorController, 6)
@@ -340,7 +298,7 @@ public class RobotContainer {
       .onTrue(new InstantCommand(m_intake::intakeOut, m_intake));
     
     //Button 9 → Reverse transfer (safety)
-    //Yet to bad added
+    //Yet to be added
 
     //Button 10 → Launch FUELs (Transfer on)
     new JoystickButton(operatorController, 10)
