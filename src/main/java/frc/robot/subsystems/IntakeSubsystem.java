@@ -82,7 +82,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     //For during transfer to prevent FUELs from being stuck by the intake
     public void intakeTransfer() {
-        runIntake(-0.15);
+        runIntake(0.55);
     }
 
     public void intakeStop() {

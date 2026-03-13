@@ -53,12 +53,13 @@ public class RobotContainer {
    final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
-  private final TransferSubsystem m_Transfer = new TransferSubsystem();
+  private final TransferSubsystem m_transfer = new TransferSubsystem();
   private final LEDSubsystem m_leds = new LEDSubsystem();
    private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
   //...Add more here
 
    private final SendableChooser<Command> autoChooser;
+
   //Controller for Driver 1 (Joystick)
   Joystick m_driverController = new Joystick(OIConstants.kDriverControllerPort);
   //Controller for Driver 2 (Custom Controller)
@@ -74,28 +75,28 @@ public class RobotContainer {
   public RobotContainer() {
 
     rotationPID.enableContinuousInput(-180, 180); // crucial for full rotations
-    rotationPID.setTolerance(1.0);                // optional, small deadband
+    rotationPID.setTolerance(1.0);           // optional, small deadband
 
-        // Register Named Commands
+        // Register Named Commands (EXAMPLES)
         // NamedCommands.registerCommand("Auto", DriveSubsystem.autoBalanceCommand());
         // NamedCommands.registerCommand("exampleCommand", exampleSubsystem.exampleCommand());
         // NamedCommands.registerCommand("someOtherCommand", new SomeOtherCommand());
 
     NamedCommands.registerCommand(
-      
             "AlignToTag10",
             new AlignToAprilTagCommand(
                 m_robotDrive,
-                6,     // AprilTag ID
+                6,   // AprilTag ID
                 3.0    // timeout
             )   
     );
  
     NamedCommands.registerCommand("IntakeDown",
-    new SequentialCommandGroup(
-        new RunCommand(m_intake::hopperOut, m_intake).withTimeout(0.15),
-        new InstantCommand(m_intake::pivotDown, m_intake)
-));
+        new SequentialCommandGroup(
+            new RunCommand(m_intake::hopperOut, m_intake).withTimeout(0.15),
+            new InstantCommand(m_intake::pivotDown, m_intake)
+        )
+    );
     
     // Action: Intake Up/Store (Button 1 logic)
     NamedCommands.registerCommand("IntakeUp", new ParallelCommandGroup(
@@ -112,8 +113,8 @@ public class RobotContainer {
     //     new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher),
     //     new WaitCommand(0.5), // Allow spin up time
     //     new ParallelCommandGroup(
-    //         new InstantCommand(m_Transfer::transferIn, m_Transfer),
-    //         new InstantCommand(m_Transfer::mecanumIn, m_Transfer),
+    //         new InstantCommand(m_transfer::transferIn, m_transfer),
+    //         new InstantCommand(m_transfer::mecanumIn, m_transfer),
     //         new InstantCommand(m_intake::intakeTransfer, m_intake)
     //     )
     // ));
@@ -121,9 +122,9 @@ public class RobotContainer {
     // // Action: Stop all intake/launcher motors
     // NamedCommands.registerCommand("StopAll", new ParallelCommandGroup(
     //     new InstantCommand(m_launcher::stopLauncher, m_launcher),
-    //     new InstantCommand(m_Transfer::transferStop, m_Transfer),
+    //     new InstantCommand(m_transfer::transferStop, m_transfer),
     //     new InstantCommand(m_intake::intakeStop, m_intake),
-    //     new InstantCommand(m_Transfer::mecanumStop, m_Transfer)
+    //     new InstantCommand(m_transfer::mecanumStop, m_transfer)
     //));
 
     // Do all other initialization
@@ -144,37 +145,35 @@ public class RobotContainer {
     
     // Configure default commands, updated with speed
     m_robotDrive.setDefaultCommand(
-    new RunCommand(
-        () -> {
-            // ---------- Translation Speed Factor (Axis 3) ----------
-            double rawThrottle = -m_driverController.getRawAxis(3);  // axis for throttle
+      new RunCommand(
+          () -> {
+              // ---------- Translation Speed Factor (Axis 3) ----------
+              double rawThrottle = -m_driverController.getRawAxis(3);  // axis for throttle
 
-            double translationFactor = MathUtil.applyDeadband(rawThrottle, 0.05);
-            translationFactor = (translationFactor + 1) / 2.0;       // -1..1 -> 0..1
-            translationFactor = MathUtil.clamp(translationFactor, 0.2, 1.0); // min 20% speed
+              double translationFactor = MathUtil.applyDeadband(rawThrottle, 0.05);
+              translationFactor = (translationFactor + 1) / 2.0;       // -1..1 -> 0..1
+              translationFactor = MathUtil.clamp(translationFactor, 0.2, 1.0); // min 20% speed
 
-            // ---------- Rotation Speed Factor (Axis 2) ----------
-            // You could also tie this to a separate slider or keep it fixed
-            double rawRot = -m_driverController.getRawAxis(2); // Right stick X
-            double rotationFactor = MathUtil.applyDeadband(rawRot, 0.05);
-            rotationFactor = rotationFactor * 0.5; // limit max rotation speed to 50% of full
+              // ---------- Rotation Speed Factor (Axis 2) ----------
+              // You could also tie this to a separate slider or keep it fixed
+              double rawRot = -m_driverController.getRawAxis(2); // Right stick X
+              double rotationFactor = MathUtil.applyDeadband(rawRot, 0.05);
+              rotationFactor = rotationFactor * 0.5; // limit max rotation speed to 50% of full
 
-            // ---------- Driver Joystick Inputs ----------
-            double xSpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(1), OIConstants.kDriveDeadband) * translationFactor;
-            double ySpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(0), OIConstants.kDriveDeadband) * translationFactor;
-            double rotSpeed = rotationFactor; // rotation already scaled separately
+              // ---------- Driver Joystick Inputs ----------
+              double xSpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(1), OIConstants.kDriveDeadband) * translationFactor;
+              double ySpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(0), OIConstants.kDriveDeadband) * translationFactor;
+              double rotSpeed = rotationFactor; // rotation already scaled separately
 
-            // ---------- Drive Command ----------
-            m_robotDrive.drive(xSpeed, ySpeed, rotSpeed, true);
+              // ---------- Drive Command ----------
+              m_robotDrive.drive(xSpeed, ySpeed, rotSpeed, true);
 
-            // ---------- Telemetry ----------
-            SmartDashboard.putNumber("Translation Factor", translationFactor);
-            SmartDashboard.putNumber("Rotation Factor", rotationFactor);
-        },
-        m_robotDrive
-    )
-);
-
+              // ---------- Telemetry ----------
+              SmartDashboard.putNumber("Translation Factor", translationFactor);
+              SmartDashboard.putNumber("Rotation Factor", rotationFactor);
+          }, m_robotDrive
+      )
+    );
   }
 
   /**
@@ -229,7 +228,7 @@ public class RobotContainer {
                     
                     double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
 
-                    double currentStrafeX  = botPose[0]; // Left/Right
+                    double currentStrafeX   = botPose[0]; // Left/Right
                     double currentDistanceZ = botPose[2]; // Forward/Back
                     double currentYaw       = botPose[4]; // Rotation relative to AprilTag
 
@@ -269,31 +268,49 @@ public class RobotContainer {
             
             // Timeline B: Pneumatics
             new SequentialCommandGroup(
-              new InstantCommand(m_intake::pivotUp),
-              new WaitCommand(0.15),
-              new InstantCommand(m_intake::hopperIn)
+              new InstantCommand(m_intake::pivotUp)
+              //new WaitCommand(0.15),
+              //new InstantCommand(m_intake::hopperIn)
             )
         )
       );
 
     //Button 2 → Intake Pivot DOWN
     new JoystickButton(operatorController, 2)
-    .onTrue(
-        new SequentialCommandGroup(
-            new InstantCommand(m_intake::hopperOut, m_intake), // Move hopper out
-            new WaitCommand(0.15),                           // Wait for 1.0 seconds
-            new InstantCommand(m_intake::pivotDown, m_intake) // Put intake down
-            )
-          );
+      .onTrue(
+          new SequentialCommandGroup(
+              //new InstantCommand(m_intake::hopperOut, m_intake), // retract hopper
+              //new WaitCommand(1),                        // wait 1 second
+              //new InstantCommand(m_intake::hopperIn, m_intake),  // extend hopper
+              new InstantCommand(m_intake::pivotDown, m_intake)  // intake ready
+          )
+      );
       
     //Button 3 → Intake
     new JoystickButton(operatorController, 3)
+      .onTrue(
+        new SequentialCommandGroup(
+          new InstantCommand(m_intake::intakeIn, m_intake),            // intake, intake
+          new InstantCommand(m_transfer::transferInSlow, m_transfer),  // transfer in
+          new InstantCommand(m_transfer::mecanumOut, m_transfer)       // mecanum in
+        )
+      )
+      .onFalse(
+        new SequentialCommandGroup(
+            new InstantCommand(() -> m_intake.intakeStop(), m_intake), // intake stop
+            new InstantCommand(m_transfer::transferStop, m_transfer),  // transfer stop
+            new InstantCommand(m_transfer::mecanumStop, m_transfer)    // mecanum stop
+        )
+      );
+
+      /* OLD CODE LOGIC IF ONE ABOVE DOESN"T WORK
       .onTrue(new InstantCommand(m_intake::intakeIn, m_intake))
-      .onTrue(new InstantCommand(m_Transfer::transferInSlow, m_Transfer))
-      .onTrue(new InstantCommand(m_Transfer::mecanumOut, m_Transfer))
+      .onTrue(new InstantCommand(m_transfer::transferInSlow, m_transfer))
+      .onTrue(new InstantCommand(m_transfer::mecanumOut, m_transfer))
       .onFalse(new InstantCommand(() -> m_intake.intakeStop(), m_intake))
-      .onFalse(new InstantCommand(m_Transfer::transferStop, m_Transfer))
-      .onFalse(new InstantCommand(m_Transfer::mecanumStop, m_Transfer));
+      .onFalse(new InstantCommand(m_transfer::transferStop, m_transfer))
+      .onFalse(new InstantCommand(m_transfer::mecanumStop, m_transfer));
+      */
 
     //Button 4 → Elevator up MAX
     new JoystickButton(operatorController, 4)
@@ -303,99 +320,104 @@ public class RobotContainer {
     new JoystickButton(operatorController, 5)
       .onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
       
+
+
+    double elevatorManualSpeedUp = 1;
+    double elevatorManualSpeedDown = 1; // do not put minus in this
+    
     //Button 6 → Elevator up manual
     new JoystickButton(operatorController, 6)
       .whileTrue(new RunCommand(() -> 
-      m_elevator.adjustPosition(1), m_elevator));
+      m_elevator.adjustPosition(elevatorManualSpeedUp), m_elevator));
 
     //Button 7 → Elevator down manual
     new JoystickButton(operatorController, 7)
       .whileTrue(new RunCommand(() -> 
-      m_elevator.adjustPosition(-1), m_elevator));
+      m_elevator.adjustPosition(-elevatorManualSpeedDown), m_elevator));
     
     //Button 8 → Reverse intake (safety)
     new JoystickButton(operatorController, 8)
-      .whileTrue(new InstantCommand(m_intake::intakeOut, m_intake));
+      .onTrue(new InstantCommand(m_intake::intakeOut, m_intake));
     
     //Button 9 → Reverse transfer (safety)
     //Yet to bad added
 
     //Button 10 → Launch FUELs (Transfer on)
     new JoystickButton(operatorController, 10)
-      .onTrue(new SequentialCommandGroup(
-        new InstantCommand(m_Transfer::transferIn, m_Transfer),
-        new InstantCommand(m_Transfer::mecanumIn, m_Transfer),
+      .onTrue(new SequentialCommandGroup( // changed from SequentialCommandGroup
+        new InstantCommand(m_transfer::transferIn, m_transfer),
+        new InstantCommand(m_transfer::mecanumIn, m_transfer),
         new InstantCommand(m_intake::intakeTransfer, m_intake)
       ))
-      .onFalse(new SequentialCommandGroup(
-        new InstantCommand(() -> m_Transfer.transferStop(), m_Transfer),
-        new InstantCommand(() -> m_Transfer.mecanumStop(), m_Transfer),
+      .onFalse(new SequentialCommandGroup( // changed from SequentialCommandGroup
+        new InstantCommand(() -> m_transfer.transferStop(), m_transfer),
+        new InstantCommand(() -> m_transfer.mecanumStop(), m_transfer),
         new InstantCommand(() -> m_intake.intakeStop(), m_intake)
       ));
     
    // Button 11 → Launchers On
-    new JoystickButton(operatorController, 11) //11
-    .onTrue(new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher));
+    new JoystickButton(operatorController, 11)
+      .onTrue(new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher));
     
 
     //Button 12 → Launchers Off
     new JoystickButton(operatorController, 12)
-    .onTrue(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
+      .onTrue(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
 /*
      // Constants
-//     double targetDistanceMetersTZ = 1.40; // meters
-//     double targetDistanceMetersTX = 0.45; // meters
-//     double targetHeadingRY = 0;
+    double targetDistanceMetersTZ = 1.40; // meters
+    double targetDistanceMetersTX = 0.45; // meters
+    double targetHeadingRY = 0;
 
-//     double distanceKp = 0.5;
-//     double strafeKp = 0.5;
-//     double steeringKp = 0.5;
+    double distanceKp = 0.5;
+    double strafeKp = 0.5;
+    double steeringKp = 0.5;
 
-//     // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
-//     int targetAprilTagID = 15;
+    // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
+    int targetAprilTagID = 15;
 
-//  new JoystickButton(operatorController, 8)
-//         .whileTrue(new RunCommand(
-//             () -> {
+ new JoystickButton(operatorController, 8)
+        .whileTrue(new RunCommand(
+            () -> {
 
-//                 double seenTagID = LimelightHelpers.getFiducialID("limelight-launch");
+                double seenTagID = LimelightHelpers.getFiducialID("limelight-launch");
 
-//                 if (seenTagID != targetAprilTagID) {
-//                     m_robotDrive.drive(0, 0, 0, false);
-//                     return;
-//                 }
-//                 int seenID = (int) LimelightHelpers.getFiducialID("limelight-launch");
-//                 if (seenID != 32) {
-//                     m_launcher.stopLauncher();
-//                     return;
-//                 }
-//                 // botPose array: [x, y, z, roll, pitch, yaw]
-//                 double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
+                if (seenTagID != targetAprilTagID) {
+                    m_robotDrive.drive(0, 0, 0, false);
+                    return;
+                }
+                int seenID = (int) LimelightHelpers.getFiducialID("limelight-launch");
+                if (seenID != 32) {
+                    m_launcher.stopLauncher();
+                    return;
+                }
+                // botPose array: [x, y, z, roll, pitch, yaw]
+                double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
 
-//                 double currentStrafeX  = botPose[0]; // Left/Right
-//                 double currentDistanceZ = botPose[2]; // Forward/Back
-//                 double currentYaw       = botPose[4]; // Rotation relative to AprilTag
+                double currentStrafeX  = botPose[0]; // Left/Right
+                double currentDistanceZ = botPose[2]; // Forward/Back
+                double currentYaw       = botPose[4]; // Rotation relative to AprilTag
 
-//                 // Errors
-//                 double distanceError = -targetDistanceMetersTZ - currentDistanceZ;
-//                 double strafeError   = -targetDistanceMetersTX - currentStrafeX;
-//                 double steeringError = targetHeadingRY - currentYaw;
-//                 double radError = Math.toRadians(steeringError);
+                // Errors
+                double distanceError = -targetDistanceMetersTZ - currentDistanceZ;
+                double strafeError   = -targetDistanceMetersTX - currentStrafeX;
+                double steeringError = targetHeadingRY - currentYaw;
+                double radError = Math.toRadians(steeringError);
 
-//                 // Deadbands
-//                 if (Math.abs(distanceError) < 0.02) distanceError = 0;
-//                 if (Math.abs(strafeError) < 0.02) strafeError = 0;
-//                 if (Math.abs(steeringError) < 2.0) steeringError = 0;
+                // Deadbands
+                if (Math.abs(distanceError) < 0.02) distanceError = 0;
+                if (Math.abs(strafeError) < 0.02) strafeError = 0;
+                if (Math.abs(steeringError) < 2.0) steeringError = 0;
 
-//                 m_robotDrive.drive(
-//                     distanceError * distanceKp,   // Forward/back
-//                     -strafeError * strafeKp,      // Left/Right
-//                     -radError * steeringKp,       // Rotation
-//                     false
-//                 );
-//             },
-//             m_robotDrive
-//         ));
+                m_robotDrive.drive(
+                    distanceError * distanceKp,   // Forward/back
+                    -strafeError * strafeKp,      // Left/Right
+                    -radError * steeringKp,       // Rotation
+                    false
+                );
+            },
+            m_robotDrive
+        ));
 */
 
     // BUTTON NUMBER 9 (right Apr-Tag) sets launcher rpm to distance value of apriltag
@@ -465,46 +487,47 @@ public class RobotContainer {
 
 
   public Command getAutonomousCommand() { 
-    
-    // // Create config for trajectory
-    // //return new PathPlannerAuto("Example Auto");
-    // TrajectoryConfig config = new TrajectoryConfig(
-    //     AutoConstants.kMaxSpeedMetersPerSecond,
-    //     AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-    //     // Add kinematics to ensure max speed is actually obeyed
-    //     .setKinematics(DriveConstants.kDriveKinematics);
+    return autoChooser.getSelected();
+    /*
+    // Create config for trajectory
+    //return new PathPlannerAuto("Example Auto");
+    TrajectoryConfig config = new TrajectoryConfig(
+        AutoConstants.kMaxSpeedMetersPerSecond,
+        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
+        // Add kinematics to ensure max speed is actually obeyed
+        .setKinematics(DriveConstants.kDriveKinematics);
 
-    // // An example trajectory to follow. All units in meters.
-    // Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-    //     // Start at the origin facing the +X direction
-    //     new Pose2d(0, 0, new Rotation2d(0)),
-    //     // Pass through these two interior waypoints, making an 's' curve path
-    //     List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-    //     // End 3 meters straight ahead of where we started, facing forward
-    //     new Pose2d(3, 0, new Rotation2d(0)),
-    //     config);
+    // An example trajectory to follow. All units in meters.
+    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
+        // Start at the origin facing the +X direction
+        new Pose2d(0, 0, new Rotation2d(0)),
+        // Pass through these two interior waypoints, making an 's' curve path
+        List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+        // End 3 meters straight ahead of where we started, facing forward
+        new Pose2d(3, 0, new Rotation2d(0)),
+        config);
 
-    // var thetaController = new ProfiledPIDController(
-    //     AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-    // thetaController.enableContinuousInput(-Math.PI, Math.PI);
+    var thetaController = new ProfiledPIDController(
+        AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-    // SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-    //     exampleTrajectory,
-    //     m_robotDrive::getPose, // Functional interface to feed supplier
-    //     DriveConstants.kDriveKinematics,
+    SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
+        exampleTrajectory,
+        m_robotDrive::getPose, // Functional interface to feed supplier
+        DriveConstants.kDriveKinematics,
 
-    //     // Position controllers
-    //     new PIDController(AutoConstants.kPXController, 0, 0),
-    //     new PIDController(AutoConstants.kPYController, 0, 0),
-    //     thetaController,
-    //     m_robotDrive::setModuleStates,
-    //     m_robotDrive);
+        // Position controllers
+        new PIDController(AutoConstants.kPXController, 0, 0),
+        new PIDController(AutoConstants.kPYController, 0, 0),
+        thetaController,
+        m_robotDrive::setModuleStates,
+        m_robotDrive);
 
-    // // Reset odometry to the starting pose of the trajectory.
-    // m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
+    // Reset odometry to the starting pose of the trajectory.
+    m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
 
-    // // Run path following command, then stop at the end.
-    // return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
-      return autoChooser.getSelected();
+    // Run path following command, then stop at the end.
+    return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
+    */
   }
 }
