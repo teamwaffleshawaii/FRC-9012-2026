@@ -61,7 +61,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeIn() {
-        runIntake(0.8);
+        runIntake(1);
     }
 
     public void intakeInFullPower() {
