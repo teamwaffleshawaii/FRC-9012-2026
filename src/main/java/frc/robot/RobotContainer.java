@@ -54,7 +54,7 @@ public class RobotContainer {
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final LauncherSubsystem m_launcher = new LauncherSubsystem();
   private final TransferSubsystem m_transfer = new TransferSubsystem();
-  //private final LEDSubsystem m_leds = new LEDSubsystem();
+  private final LEDSubsystem m_leds = new LEDSubsystem();
    private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
   //...Add more here
 
@@ -131,7 +131,7 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
     // Configure the button bindings
     configureButtonBindings();
-   
+   m_leds.setDefaultCommand(new RunCommand(m_leds::rainbow, m_leds));
 
     
     // Configure default commands, updated with speed
@@ -187,15 +187,23 @@ public class RobotContainer {
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
 
-    double targetDistanceMetersTZ = 1.40; // meters
-    double targetDistanceMetersTX = 0.45; // meters
+    double bumpTargetDistanceMetersTZ = 1.9; // meters // back and forth
+    double bumpTargetDistanceMetersTX = -1.2; // meters / side to side
+
+     double hubTargetDistanceMetersTZ = 2; // meters // back and forth
+    double hubTargetDistanceMetersTX = -.6; // meters / side to side
     double targetHeadingRY = 0;
 
-    double distanceKp = 0.5;
-    double strafeKp = 0.5;
-    double steeringKp = 0.2;
+    double bumpDistanceKp = 0.5;
+    double bumpStrafeKp = 0.5;
+    double bumpsteeringKp = -.5;
+
+    double hubDistanceKp = 0.5;
+    double hubStrafeKp = 0.5;
+    double hubSteeringKp = -.5;
 
     // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
+    // desired tags 1,6,7,9,10,12,15,22,23,25,26,31
     int[] targetAprilTagID = {1,6,7,9,10,12,15,22,23,25,26,31};
 
     new JoystickButton(m_driverController, 1)
@@ -203,77 +211,82 @@ public class RobotContainer {
                 () -> {
  boolean hasTarget = LimelightHelpers.getTV("limelight-launch");
 
-            // Driver translation stays manual
-            double xSpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(1), OIConstants.kDriveDeadband);
-            double ySpeed = -MathUtil.applyDeadband(m_driverController.getRawAxis(0), OIConstants.kDriveDeadband);
+            // 2. Get the specific ID currently in view
+            int seenID = (int) LimelightHelpers.getFiducialID("limelight-launch");
 
-            double rotSpeed = 0;
-
-            if (hasTarget) {
-
-                // botPose: [x, y, z, roll, pitch, yaw]
+            // 3. ONLY proceed if the target is specifically ID 11
+            if (hasTarget && seenID == 11) {
+                // Get Pose data
                 double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
 
-                double currentYaw = botPose[4];
+                double currentStrafeX   = botPose[0]; // Left/Right
+                double currentDistanceZ = botPose[2]; // Forward/Back
+                double currentYaw       = botPose[4]; // Rotation
 
-                double steeringError = 0 - currentYaw;
+                // Errors (using your existing constants)
+                double distanceError = -bumpTargetDistanceMetersTZ - currentDistanceZ;
+                double strafeError   = -bumpTargetDistanceMetersTX - currentStrafeX;
+                double steeringError = targetHeadingRY - currentYaw;
                 double radError = Math.toRadians(steeringError);
 
-                rotSpeed = -radError * steeringKp;
-            }
+                // Deadbands
+                if (Math.abs(distanceError) < 0.02) distanceError = 0;
+                if (Math.abs(strafeError) < 0.02) strafeError = 0;
+                if (Math.abs(steeringError) < 2.0) steeringError = 0;
 
-            m_robotDrive.drive(
-                xSpeed,
-                ySpeed,
-                rotSpeed,
-                true)
+                m_robotDrive.drive(
+                    distanceError * hubDistanceKp, 
+                    -strafeError * hubStrafeKp, 
+                    -radError * hubSteeringKp, 
+                    false
+                );
+
                 
-                //     double seenTagID = LimelightHelpers.getFiducialID("limelight-launch");
+                
+                // Optional: Feedback that we are locked
+                m_leds.setSolidColor(0, 255, 0); // Green
+            } else {
+                // If no target or wrong target, stop moving
+                m_robotDrive.drive(0, 0, 0, false);
+                
+                // Optional: Feedback that we are searching/invalid
+                m_leds.setSolidColor(255, 0, 0); // Red
+            }
+                
+               if (hasTarget && seenID == 10) {
+                // Get Pose data
+                double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
 
-                //     // if (seenTagID != targetAprilTagID) {
-                //     //     m_leds.setSolidColor(255, 0, 0);
-                //     //     m_robotDrive.drive(0, 0, 0, false);
-                //     //      m_leds.setSolidColor(0, 255, 0);
-                //     //     return;
-                //     // }
-                //     int seenID = (int) LimelightHelpers.getFiducialID("limelight-launch");
-                    
-                //  //   botPose array: [x, y, z, roll, pitch, yaw]
-                    
-                //     double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
+                double currentStrafeX   = botPose[0]; // Left/Right
+                double currentDistanceZ = botPose[2]; // Forward/Back
+                double currentYaw       = botPose[4]; // Rotation
 
-                //     double currentStrafeX   = botPose[0]; // Left/Right
-                //     double currentDistanceZ = botPose[2]; // Forward/Back
-                //     double currentYaw       = botPose[4]; // Rotation relative to AprilTag
+                // Errors (using your existing constants)
+                double distanceError = -hubTargetDistanceMetersTZ - currentDistanceZ;
+                double strafeError   = -hubTargetDistanceMetersTX - currentStrafeX;
+                double steeringError = targetHeadingRY - currentYaw;
+                double radError = Math.toRadians(steeringError);
 
-                //     // Errors
-                //     double distanceError = -targetDistanceMetersTZ - currentDistanceZ;
-                //     double strafeError   = -targetDistanceMetersTX - currentStrafeX;
-                //     double steeringError = targetHeadingRY - currentYaw;
-                //     double radError = Math.toRadians(steeringError);
+                // Deadbands
+                if (Math.abs(distanceError) < 0.02) distanceError = 0;
+                if (Math.abs(strafeError) < 0.02) strafeError = 0;
+                if (Math.abs(steeringError) < 2.0) steeringError = 0;
 
-                //     // Deadbands
-                //     if (Math.abs(distanceError) < 0.02) distanceError = 0;
-                //     if (Math.abs(strafeError) < 0.02) strafeError = 0;
-                //     if (Math.abs(steeringError) < 2.0) steeringError = 0;
-
-                //     m_robotDrive.drive(
-                //         distanceError * distanceKp,   // Forward/back
-                //         -strafeError * strafeKp,      // Left/Right
-                //         -radError * steeringKp,       // Rotation
-                //         false
-                    ;
-                },
-
-                m_robotDrive //m_leds
-            )
-            );
+                m_robotDrive.drive(
+                    distanceError * hubDistanceKp, 
+                    -strafeError * hubStrafeKp, 
+                    -radError * hubSteeringKp, 
+                    false
+                );}},
+        m_robotDrive, m_leds
+    ));
 
     //Add button bindings here:
 
     //Button 1 → Intake Pivot UP
     new JoystickButton(operatorController, 1)
       .onTrue(new SequentialCommandGroup(new InstantCommand(m_intake::pivotUp, m_intake)));
+     // .onTrue(new SequentialCommandGroup(new InstantCommand(m_launcher::launcherBackup, m_launcher)));
 
     //Button 2 → Intake Pivot DOWN
     new JoystickButton(operatorController, 2)
@@ -283,6 +296,7 @@ public class RobotContainer {
     new JoystickButton(operatorController, 3)
       .onTrue(
         new SequentialCommandGroup(
+           new InstantCommand(m_leds::intakeColor, m_leds),  
           new InstantCommand(m_intake::intakeIn, m_intake),            // intake, intake
           new InstantCommand(m_transfer::transferInSlow, m_transfer),  // transfer in
           new InstantCommand(m_transfer::mecanumOut, m_transfer)       // mecanum in
@@ -340,14 +354,15 @@ public class RobotContainer {
    
    new JoystickButton(operatorController, 9)
       .onTrue(new SequentialCommandGroup( // changed from SequentialCommandGroup
+        new InstantCommand(m_leds::reverseColor, m_leds),
         new InstantCommand(m_transfer::transferOut, m_transfer),
-        new InstantCommand(m_transfer::mecanumOut, m_transfer),
-        new InstantCommand(m_launcher::LauncherOut, m_launcher)
+        new InstantCommand(m_transfer::mecanumOut, m_transfer)
+       // new InstantCommand(m_launcher::LauncherOut, m_launcher)
       ))
       .onFalse(new SequentialCommandGroup(
       new InstantCommand(() -> m_transfer.transferStop(), m_transfer),
-        new InstantCommand(() -> m_transfer.mecanumStop(), m_transfer),
-        new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher)
+        new InstantCommand(() -> m_transfer.mecanumStop(), m_transfer)
+        //new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher)
       ));
      
       
@@ -419,11 +434,11 @@ public class RobotContainer {
             LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", LauncherSubsystem.validTags);
             m_launcher.runLauncher(m_launcher.getCalculatedPower());
 
-         }, m_launcher))//.onFalse(
-        //                 new SequentialCommandGroup(
-        //                     new InstantCommand(m_launcher::stopLauncher, m_launcher),
-        //                     new InstantCommand(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", new int[] {}))
-        //                 ))
+         }, m_launcher)).onFalse(
+                         new SequentialCommandGroup(
+                             new InstantCommand(m_launcher::launcherBackup, m_launcher),
+                             new InstantCommand(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", new int[] {}))
+                         ))
                       ;
 
 /* 

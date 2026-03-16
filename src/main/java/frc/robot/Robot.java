@@ -42,7 +42,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
- //m_leds.setDefaultCommand(new RunCommand(m_leds::rainbow, m_leds));
+ 
     //LimelightHelpers.setPriorityTagID("limelight-launch", 31);
 
 
@@ -65,6 +65,7 @@ public class Robot extends TimedRobot {
 
     double omegaRps = Units.degreesToRotations(m_robotContainer.m_robotDrive.getTurnRate());
     var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-launch");
+    
 
     if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
         m_robotContainer.m_robotDrive.resetOdometry(llMeasurement.pose);
@@ -124,6 +125,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     double currentDistance = LimelightHelpers.getBotPose_TargetSpace("limelight-launch")[2];
+    
 
     SmartDashboard.putNumber("Distance from AprilTag", currentDistance);
     // botPose array: [x, y, z, roll, pitch, yaw]

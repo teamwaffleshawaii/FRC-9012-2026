@@ -61,7 +61,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeIn() {
-        runIntake(1);
+        runIntake(.85);
     }
 
     public void intakeInFullPower() {
@@ -74,7 +74,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     //For during transfer to prevent FUELs from being stuck by the intake
     public void intakeTransfer() {
-        runIntake(0.55);
+        runIntake(0.50);
     }
 
     public void intakeStop() {

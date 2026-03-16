@@ -19,7 +19,7 @@ public class LauncherSubsystem extends SubsystemBase {
   private double cachedPower = 0.0;
   private double m_calculatedPower = 0.0;
 
-  public static final int[] validTags = {32,10};
+  public static final int[] validTags = {32,10,11,7};
 
   public LauncherSubsystem() {
 
@@ -44,18 +44,18 @@ public class LauncherSubsystem extends SubsystemBase {
       if (hasTarget && isValidTag) {
 
           double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
-          tz = Math.abs(botPose[2]);
+          tz = Math.abs(botPose[0]);
 
-          double tzMin = 0.5;
-          double tzMax = 2.5;
+          double tzMin = .65;
+          double tzMax = 1.8;
 
-          double powerMin = 0.45;   // minimum shooter speed
-          double powerMax = 0.85;    // full speed
-
+          double powerMin = 0.85;   // minimum shooter speed
+          double powerMax = 1;    // full speed
+         
           double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);
 
           m_calculatedPower =
-              powerMin + (clampedTz - tzMin) * (powerMax - powerMin) / (tzMax - tzMin);
+              powerMin  + (clampedTz - tzMin) * (powerMax - powerMin) / (tzMax - tzMin);
 
       }
 
@@ -95,6 +95,13 @@ public class LauncherSubsystem extends SubsystemBase {
 
       launcherMotorL.set(-.3);
       launcherMotorR.set(-.3);
+  }
+
+   public void launcherBackup() {
+      
+
+      launcherMotorL.set(.7);
+      launcherMotorR.set(.7);
   }
 
   public void holdLastPower() {
