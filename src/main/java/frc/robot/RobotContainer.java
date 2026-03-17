@@ -190,7 +190,7 @@ public class RobotContainer {
     double bumpTargetDistanceMetersTZ = 1.9; // meters // back and forth
     double bumpTargetDistanceMetersTX = -1.2; // meters / side to side
 
-     double hubTargetDistanceMetersTZ = 2; // meters // back and forth
+     double hubTargetDistanceMetersTZ = 1.5; // meters // back and forth
     double hubTargetDistanceMetersTX = -.6; // meters / side to side
     double targetHeadingRY = 0;
 
@@ -436,7 +436,7 @@ public class RobotContainer {
 
          }, m_launcher)).onFalse(
                          new SequentialCommandGroup(
-                             new InstantCommand(m_launcher::launcherBackup, m_launcher),
+                             new InstantCommand(m_launcher::holdLastPower, m_launcher),
                              new InstantCommand(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", new int[] {}))
                          ))
                       ;

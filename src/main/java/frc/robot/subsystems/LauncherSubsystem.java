@@ -46,10 +46,10 @@ public class LauncherSubsystem extends SubsystemBase {
           double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
           tz = Math.abs(botPose[0]);
 
-          double tzMin = .65;
-          double tzMax = 1.8;
+          double tzMin = 1.4;
+          double tzMax = 2.25;
 
-          double powerMin = 0.85;   // minimum shooter speed
+          double powerMin = 0.9;   // minimum shooter speed
           double powerMax = 1;    // full speed
          
           double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);
