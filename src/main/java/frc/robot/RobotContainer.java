@@ -52,7 +52,7 @@ public class RobotContainer {
   // The robot's subsystems
    final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
-  private final LauncherSubsystem m_launcher = new LauncherSubsystem();
+  final LauncherSubsystem m_launcher = new LauncherSubsystem();
   private final TransferSubsystem m_transfer = new TransferSubsystem();
   private final LEDSubsystem m_leds = new LEDSubsystem();
    private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
@@ -91,32 +91,37 @@ public class RobotContainer {
             )   
     );
  
-    NamedCommands.registerCommand("IntakeDown",
-        new SequentialCommandGroup(new InstantCommand(m_intake::pivotDown, m_intake)));
+    // NamedCommands.registerCommand("IntakeDown",
+    //     new SequentialCommandGroup(new InstantCommand(m_intake::pivotDown, m_intake)));
     
-    // Action: Intake Up/Store (Button 1 logic)
-    NamedCommands.registerCommand("IntakeUp", new ParallelCommandGroup(
-        new StartEndCommand(m_intake::intakeInFullPower, m_intake::intakeStop).withTimeout(3.0),
-        new SequentialCommandGroup(new InstantCommand(m_intake::pivotUp))));
+    // // Action: Intake Up/Store (Button 1 logic)
+    // NamedCommands.registerCommand("IntakeUp", new ParallelCommandGroup(
+    //    // new StartEndCommand(m_intake::intakeInFullPower, m_intake::intakeStop).withTimeout(3.0),
+    //     new SequentialCommandGroup(new InstantCommand(m_intake::pivotUp))));
 
-    // Action: Spin up and Launch (Button 11 + 10 logic)
-    // NamedCommands.registerCommand("LaunchSequence", new SequentialCommandGroup(
-    //     new InstantCommand(() -> m_launcher.runLauncherPower(0.7), m_launcher),
-    //     new WaitCommand(0.5), // Allow spin up time
+    //     NamedCommands.registerCommand("IntakeIn", new ParallelCommandGroup(
+    //     new StartEndCommand(m_intake::intakeIn, m_intake::intakeStop).withTimeout(3.0)));
+       
+
+
+    // // Action: Spin up and Launch (Button 11 + 10 logic)
+    //      NamedCommands.registerCommand("Launcher", new ParallelCommandGroup(
     //     new ParallelCommandGroup(
+    //       new InstantCommand(m_launcher::launcherBackup, m_launcher),
     //         new InstantCommand(m_transfer::transferIn, m_transfer),
     //         new InstantCommand(m_transfer::mecanumIn, m_transfer),
     //         new InstantCommand(m_intake::intakeTransfer, m_intake)
-    //     )
-    // ));
+    //     )));
+    //     // NamedCommands.registerCommand("LaunchSequence", new SequentialCommandGroup(
+    
 
-    // // Action: Stop all intake/launcher motors
+    // // // Action: Stop all intake/launcher motors
     // NamedCommands.registerCommand("StopAll", new ParallelCommandGroup(
     //     new InstantCommand(m_launcher::stopLauncher, m_launcher),
     //     new InstantCommand(m_transfer::transferStop, m_transfer),
     //     new InstantCommand(m_intake::intakeStop, m_intake),
     //     new InstantCommand(m_transfer::mecanumStop, m_transfer)
-    //));
+    // ));
 
     // Do all other initialization
     configureButtonBindings();
@@ -177,7 +182,7 @@ public class RobotContainer {
    * {@link JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(m_driverController, 3)
+    new JoystickButton(m_driverController, 6)
         .whileTrue(new RunCommand(
             () -> m_robotDrive.setX(),
             m_robotDrive));
@@ -187,11 +192,20 @@ public class RobotContainer {
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
 
+            new JoystickButton(m_driverController, 11)
+        .onTrue(new InstantCommand(
+            () -> m_launcher.adjustBackupPower( 0.01)));
+           ;
+           new JoystickButton(m_driverController, 12)
+        .onTrue(new InstantCommand(
+            () -> m_launcher.adjustBackupPower(-.01)));
+           ;
+
     double bumpTargetDistanceMetersTZ = 1.9; // meters // back and forth
     double bumpTargetDistanceMetersTX = -1.2; // meters / side to side
 
-     double hubTargetDistanceMetersTZ = 1.5; // meters // back and forth
-    double hubTargetDistanceMetersTX = -.6; // meters / side to side
+     double hubTargetDistanceMetersTZ = 0.43; // meters // back and forth
+    double hubTargetDistanceMetersTX = 0; // meters / side to side
     double targetHeadingRY = 0;
 
     double bumpDistanceKp = 0.5;
@@ -200,85 +214,26 @@ public class RobotContainer {
 
     double hubDistanceKp = 0.5;
     double hubStrafeKp = 0.5;
-    double hubSteeringKp = -.5;
+    double hubSteeringKp = 0.5;
 
     // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
     // desired tags 1,6,7,9,10,12,15,22,23,25,26,31
     int[] targetAprilTagID = {1,6,7,9,10,12,15,22,23,25,26,31};
 
+   
+ new JoystickButton(m_driverController, 1)
+    .whileTrue(new AlignToAprilTagCommand(
+        m_robotDrive,
+        6,      // target tag ID
+        3.0     // timeout seconds
+    ));
+
+
     new JoystickButton(m_driverController, 1)
-            .whileTrue(new RunCommand(
-                () -> {
- boolean hasTarget = LimelightHelpers.getTV("limelight-launch");
-
-            // 2. Get the specific ID currently in view
-            int seenID = (int) LimelightHelpers.getFiducialID("limelight-launch");
-
-            // 3. ONLY proceed if the target is specifically ID 11
-            if (hasTarget && seenID == 11) {
-                // Get Pose data
-                double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
-
-                double currentStrafeX   = botPose[0]; // Left/Right
-                double currentDistanceZ = botPose[2]; // Forward/Back
-                double currentYaw       = botPose[4]; // Rotation
-
-                // Errors (using your existing constants)
-                double distanceError = -bumpTargetDistanceMetersTZ - currentDistanceZ;
-                double strafeError   = -bumpTargetDistanceMetersTX - currentStrafeX;
-                double steeringError = targetHeadingRY - currentYaw;
-                double radError = Math.toRadians(steeringError);
-
-                // Deadbands
-                if (Math.abs(distanceError) < 0.02) distanceError = 0;
-                if (Math.abs(strafeError) < 0.02) strafeError = 0;
-                if (Math.abs(steeringError) < 2.0) steeringError = 0;
-
-                m_robotDrive.drive(
-                    distanceError * hubDistanceKp, 
-                    -strafeError * hubStrafeKp, 
-                    -radError * hubSteeringKp, 
-                    false
-                );
-
-                
-                
-                // Optional: Feedback that we are locked
-                m_leds.setSolidColor(0, 255, 0); // Green
-            } else {
-                // If no target or wrong target, stop moving
-                m_robotDrive.drive(0, 0, 0, false);
-                
-                // Optional: Feedback that we are searching/invalid
-                m_leds.setSolidColor(255, 0, 0); // Red
-            }
-                
-               if (hasTarget && seenID == 10) {
-                // Get Pose data
-                double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
-
-                double currentStrafeX   = botPose[0]; // Left/Right
-                double currentDistanceZ = botPose[2]; // Forward/Back
-                double currentYaw       = botPose[4]; // Rotation
-
-                // Errors (using your existing constants)
-                double distanceError = -hubTargetDistanceMetersTZ - currentDistanceZ;
-                double strafeError   = -hubTargetDistanceMetersTX - currentStrafeX;
-                double steeringError = targetHeadingRY - currentYaw;
-                double radError = Math.toRadians(steeringError);
-
-                // Deadbands
-                if (Math.abs(distanceError) < 0.02) distanceError = 0;
-                if (Math.abs(strafeError) < 0.02) strafeError = 0;
-                if (Math.abs(steeringError) < 2.0) steeringError = 0;
-
-                m_robotDrive.drive(
-                    distanceError * hubDistanceKp, 
-                    -strafeError * hubStrafeKp, 
-                    -radError * hubSteeringKp, 
-                    false
-                );}},
-        m_robotDrive, m_leds
+    .whileTrue(new AlignToAprilTagCommand(
+        m_robotDrive,
+        6,      // target tag ID
+        3.0     // timeout seconds
     ));
 
     //Add button bindings here:
@@ -351,7 +306,13 @@ public class RobotContainer {
         new InstantCommand(() -> m_intake.intakeStop(), m_intake)
       ));
     
-   
+    new JoystickButton(operatorController, 11)
+      .onTrue(new SequentialCommandGroup( // changed from SequentialCommandGroup
+        new InstantCommand(m_launcher::launcherBackup, m_launcher)));
+
+        // return m_launcher.backupPower
+        ;
+
    new JoystickButton(operatorController, 9)
       .onTrue(new SequentialCommandGroup( // changed from SequentialCommandGroup
         new InstantCommand(m_leds::reverseColor, m_leds),
@@ -371,6 +332,8 @@ public class RobotContainer {
     //Button 12 → Launchers Off
     new JoystickButton(operatorController, 12)
       .onTrue(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
+
+    
 /*
      // Constants
     double targetDistanceMetersTZ = 1.40; // meters
@@ -429,17 +392,19 @@ public class RobotContainer {
 */
 
     // BUTTON NUMBER 9 (right Apr-Tag) sets launcher rpm to distance value of apriltag
-    new JoystickButton(operatorController, 11).onTrue(new RunCommand(() -> {
+    // new JoystickButton(operatorController, 11).onTrue(new RunCommand(() -> {
 
-            LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", LauncherSubsystem.validTags);
-            m_launcher.runLauncher(m_launcher.getCalculatedPower());
 
-         }, m_launcher)).onFalse(
-                         new SequentialCommandGroup(
-                             new InstantCommand(m_launcher::holdLastPower, m_launcher),
-                             new InstantCommand(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", new int[] {}))
-                         ))
-                      ;
+    //         new InstantCommand(m_launcher::launcherBackup, m_launcher);
+    //         // LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", LauncherSubsystem.validTags);
+    //         // m_launcher.runLauncher(m_launcher.getCalculatedPower());
+
+    //      }, m_launcher))//.onFalse(
+    //                     //  new SequentialCommandGroup(
+    //                     //      new InstantCommand(m_launcher::holdLastPower, m_launcher),
+    //                     //      new InstantCommand(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", new int[] {}))
+    //                     // )//)
+    //                   ;
 
 /* 
     new JoystickButton(operatorController, 9).whileTrue(new RunCommand(() -> {

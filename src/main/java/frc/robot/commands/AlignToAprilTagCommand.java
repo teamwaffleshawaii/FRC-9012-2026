@@ -16,8 +16,8 @@ public class AlignToAprilTagCommand extends Command {
     private final Timer timer = new Timer();
 
     // ===== Alignment Constants =====
-    private static final double targetDistanceMetersTZ = 0.43;
-    private static final double targetDistanceMetersTX = 0;
+    private static final double targetDistanceMetersTZ = 2.4;
+    private static final double targetDistanceMetersTX = 1.3;
     private static final double targetHeadingRY = 0;
 
     private static final double distanceKp = 0.5;
@@ -89,8 +89,8 @@ public class AlignToAprilTagCommand extends Command {
         if (LimelightHelpers.getTV("limelight-launch")) {
             double[] pose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
             boolean aligned =
-                Math.abs(pose[2] + targetDistanceMetersTZ) < 0.03 &&
-                Math.abs(pose[0] + targetDistanceMetersTX) < 0.03 &&
+                Math.abs(pose[2] + targetDistanceMetersTZ) < 0.04 &&
+                Math.abs(pose[0] + targetDistanceMetersTX) < 0.04 &&
                 Math.abs(pose[4]) < 3.0;
 
             return aligned || timedOut;

@@ -12,12 +12,17 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 public class LauncherSubsystem extends SubsystemBase {
 
-  // Motor Definitions
+  public static double launchspeed;
+// Motor Definitions
   private final SparkFlex launcherMotorL = new SparkFlex(15, MotorType.kBrushless);
   private final SparkFlex launcherMotorR = new SparkFlex(16, MotorType.kBrushless);
 
+ //private final LEDSubsystem m_leds = new LEDSubsystem();
+
   private double cachedPower = 0.0;
   private double m_calculatedPower = 0.0;
+
+  private double backupPower = 0.7;
 
   public static final int[] validTags = {32,10,11,7};
 
@@ -68,6 +73,8 @@ public class LauncherSubsystem extends SubsystemBase {
       SmartDashboard.putNumber("Shooter Target Power", m_calculatedPower);
       SmartDashboard.putNumber("Actual L RPM", launcherVelocityL);
       SmartDashboard.putNumber("Actual R RPM", launcherVelocityR);
+      SmartDashboard.putNumber("Power", backupPower);
+
   }
 
   public double getCalculatedPower() {
@@ -99,9 +106,17 @@ public class LauncherSubsystem extends SubsystemBase {
 
    public void launcherBackup() {
       
+    //m_leds.launchColor();
+      launcherMotorL.set(backupPower);
+      launcherMotorR.set(backupPower);
+  }
 
-      launcherMotorL.set(.7);
-      launcherMotorR.set(.7);
+  public void adjustBackupPower(double delta) {
+    backupPower = MathUtil.clamp(backupPower + delta, 0.0, 1.0);
+  }
+
+  public double getBackupPower() {
+    return backupPower;
   }
 
   public void holdLastPower() {
