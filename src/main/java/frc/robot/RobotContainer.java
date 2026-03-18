@@ -194,11 +194,11 @@ public class RobotContainer {
 
             new JoystickButton(m_driverController, 11)
         .onTrue(new InstantCommand(
-            () -> m_launcher.adjustBackupPower( 0.01)));
+            () -> m_launcher.adjustBackupPower( 0.005)));
            ;
            new JoystickButton(m_driverController, 12)
         .onTrue(new InstantCommand(
-            () -> m_launcher.adjustBackupPower(-.01)));
+            () -> m_launcher.adjustBackupPower(-.005)));
            ;
 
     double bumpTargetDistanceMetersTZ = 1.9; // meters // back and forth
@@ -273,8 +273,8 @@ public class RobotContainer {
     new JoystickButton(operatorController, 5)
       .onTrue(new InstantCommand(m_elevator::goBottom, m_elevator));
       
-      double elevatorManualSpeedUp = 1;
-      double elevatorManualSpeedDown = 1; // do not put minus in this
+      double elevatorManualSpeedUp = 0.5;
+      double elevatorManualSpeedDown = 0.5; // do not put minus in this
     
     //Button 6 → Elevator up manual
     new JoystickButton(operatorController, 6)

@@ -16,8 +16,8 @@ public class AlignToAprilTagCommand extends Command {
     private final Timer timer = new Timer();
 
     // ===== Alignment Constants =====
-    private static final double targetDistanceMetersTZ = 2.4;
-    private static final double targetDistanceMetersTX = 1.3;
+    private static final double targetDistanceMetersTZ = 1.3;
+    private static final double targetDistanceMetersTX = 0.7;
     private static final double targetHeadingRY = 0;
 
     private static final double distanceKp = 0.5;
