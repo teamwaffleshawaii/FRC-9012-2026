@@ -3,48 +3,57 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.456228915662652,
-        "y": 7.433518072289157
+        "x": 9.281364175558087,
+        "y": 6.21373665480427
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.3982964670102564,
-        "y": 7.433518072289157
+        "x": 9.711731909840411,
+        "y": 6.988398576512456
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.885563480741797,
-        "y": 7.327888730385164
+        "x": 11.121186239615026,
+        "y": 7.429525504151838
       },
       "prevControl": {
-        "x": 6.24082854098276,
-        "y": 7.568298368939381
+        "x": 10.346000992946912,
+        "y": 7.264592472945857
       },
       "nextControl": {
-        "x": 7.5010146360701135,
-        "y": 7.098398469076299
+        "x": 12.13255041517849,
+        "y": 7.6447093712930005
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.299600570613409,
-        "y": 6.38336661911555
+        "x": 13.520486358238989,
+        "y": 6.622586002372479
       },
       "prevControl": {
-        "x": 7.122823875316772,
-        "y": 6.560143314412186
+        "x": 14.983736654798893,
+        "y": 6.816251482799527
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "FuelPickup1"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6569536423841061,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1.319205298013247,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -58,13 +67,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -37.0
+    "rotation": -134.51030440687072
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -138.99091309842981
   },
   "useDefaultConstraints": true
 }

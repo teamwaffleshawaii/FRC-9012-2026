@@ -5,16 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "FuelPickupLeft"
-                }
-              }
-            ]
+            "pathName": " FuelPickupLeftRed"
           }
         },
         {
@@ -30,9 +23,9 @@
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "IntakeStop"
+            "pathName": "Return from center red"
           }
         }
       ]

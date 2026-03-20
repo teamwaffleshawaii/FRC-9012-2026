@@ -7,13 +7,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "FuelPickupLeft"
+            "pathName": "FuelPickupLeftBlue"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeDown"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeIn"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "FuelGoBackLeft"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": []
           }
         }
       ]

@@ -8,27 +8,64 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.911440798858774,
-        "y": 6.719771754636234
+        "x": 6.6130842230130495,
+        "y": 6.418161328588375
       },
       "isLocked": false,
       "linkedName": "FuelPickup1"
     },
     {
       "anchor": {
-        "x": 6.3938944365192585,
-        "y": 6.939728958630528
+        "x": 6.236512455516015,
+        "y": 7.149786476868328
       },
       "prevControl": {
-        "x": 6.859686162624821,
-        "y": 6.745649072753209
+        "x": 6.408666343436813,
+        "y": 6.181460282616863
+      },
+      "nextControl": {
+        "x": 6.176660505236089,
+        "y": 7.486439990379175
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.913131672597866,
+        "y": 7.3111743772242
+      },
+      "prevControl": {
+        "x": 4.568837485172011,
+        "y": 7.3111743772242
+      },
+      "nextControl": {
+        "x": 5.365529846020338,
+        "y": 7.3111743772242
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.234697508896798,
+        "y": 6.525753262158957
+      },
+      "prevControl": {
+        "x": 1.2012099644128118,
+        "y": 7.924448398576512
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 2.357712765957457,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,7 +79,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -61.23235066115627
   },
   "reversed": false,
   "folder": null,
