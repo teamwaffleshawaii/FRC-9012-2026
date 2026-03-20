@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.commands.AlignToAprilTagCommand;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 //import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.Constants;
 
@@ -31,6 +32,7 @@ public class Robot extends TimedRobot {
 
   private RobotContainer m_robotContainer;
  // private final LEDSubsystem m_leds = new LEDSubsystem();
+  //private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final XboxController m_driverController = new XboxController(0);
 
   /**
@@ -42,6 +44,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+   
  
     //LimelightHelpers.setPriorityTagID("limelight-launch", 31);
 
@@ -65,6 +68,7 @@ public class Robot extends TimedRobot {
 
     double omegaRps = Units.degreesToRotations(m_robotContainer.m_robotDrive.getTurnRate());
     var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-launch");
+     
     
 
     if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
@@ -96,7 +100,7 @@ public class Robot extends TimedRobot {
      * autonomousCommand = new ExampleCommand(); break; }
      */
 
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+   // m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     
     // schedule the autonomous command (example)

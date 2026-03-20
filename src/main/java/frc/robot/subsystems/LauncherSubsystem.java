@@ -4,33 +4,72 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
-
 import java.util.Arrays;
 
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class LauncherSubsystem extends SubsystemBase {
 
-  public static double launchspeed;
-// Motor Definitions
   private final SparkFlex launcherMotorL = new SparkFlex(15, MotorType.kBrushless);
   private final SparkFlex launcherMotorR = new SparkFlex(16, MotorType.kBrushless);
 
- //private final LEDSubsystem m_leds = new LEDSubsystem();
+  private final SparkClosedLoopController closedLoopControllerL = launcherMotorL.getClosedLoopController();
 
-  private double cachedPower = 0.0;
-  private double m_calculatedPower = 0.0;
+  private double m_calculatedRPM = 0.0;
+  public static final int[] validTags = {9, 10, 25, 26};
 
-  private double backupPower = 0.7;
+  //  PID VALUES (tunable from Shuffleboard)
+  private double kP = 0.0003; //was .00002
+  private double kI = 0.0;
+  private double kD = 0.0028; // was .0021
+  private double kFF = 0.00195;
 
-  public static final int[] validTags = {32,10,11,7};
+  // Track previous values (prevents CAN spam)
+  private double prevP = kP;
+  private double prevI = kI;
+  private double prevD = kD;
+  private double prevFF = kFF;
 
   public LauncherSubsystem() {
 
-    // Churro shaft → one motor inverted
-    launcherMotorL.setInverted(false);
-    launcherMotorR.setInverted(true);
+    SparkFlexConfig motorConfigL = new SparkFlexConfig();
+    SparkFlexConfig motorConfigR = new SparkFlexConfig();
+
+    // Initial config (will be overridden by Shuffleboard)
+    motorConfigL.closedLoop
+        .p(kP)
+        .d(kD)
+        .velocityFF(kFF);
+
+    motorConfigL
+        .inverted(false)
+        .idleMode(IdleMode.kCoast)
+        .smartCurrentLimit(60);
+
+    // Motor R follows L (inverted)
+    motorConfigR
+        .follow(launcherMotorL, true)
+        .idleMode(IdleMode.kCoast)
+        .smartCurrentLimit(60);
+
+    launcherMotorL.configure(motorConfigL, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    launcherMotorR.configure(motorConfigR, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // Initialize Shuffleboard values
+    //SmartDashboard.putNumber("Shooter/Target RPM", m_calculatedRPM);
+     SmartDashboard.putNumber("Shooter/Actual L RPM", launcherMotorL.getEncoder().getVelocity());
+     SmartDashboard.putNumber("Shooter/Actual R RPM", launcherMotorR.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Shooter/P", kP);
+    SmartDashboard.putNumber("Shooter/D", kD);
+    SmartDashboard.putNumber("Shooter/FF", kFF);
+  
+    
 
     stopLauncher();
   }
@@ -38,92 +77,59 @@ public class LauncherSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-      boolean hasTarget = LimelightHelpers.getTV("limelight-launch");
+    // ================= LIMELIGHT RPM CALC =================
+    boolean hasTarget = LimelightHelpers.getTV("limelight-launch");
+    int currentTargetID = (int) LimelightHelpers.getFiducialID("limelight-launch");
+    boolean isValidTag = Arrays.stream(validTags).anyMatch(id -> id == currentTargetID);
 
-      int currentTargetID = (int) LimelightHelpers.getFiducialID("limelight-launch");
+    if (hasTarget && isValidTag) {
+        double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
+        double tz = Math.abs(botPose[2]);
 
-      boolean isValidTag = Arrays.stream(validTags).anyMatch(id -> id == currentTargetID);
+        double tzMin = 0.1; 
+        double tzMax = 3.0;
+        double rpmMin = 0.0; 
+        double rpmMax = 6784.0; 
 
-      double tz = 0.0;
+        double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);
+        m_calculatedRPM = rpmMin + (clampedTz - tzMin) * (rpmMax - rpmMin) / (tzMax - tzMin);
+    }
 
-      if (hasTarget && isValidTag) {
+    // ================= READ PID FROM SHUFFLEBOARD =================
+    kP = SmartDashboard.getNumber("Shooter/P", kP);
+    kI = SmartDashboard.getNumber("Shooter/I", kI);
+    kD = SmartDashboard.getNumber("Shooter/D", kD);
+    kFF = SmartDashboard.getNumber("Shooter/FF", kFF);
 
-          double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
-          tz = Math.abs(botPose[0]);
-
-          double tzMin = 1.4;
-          double tzMax = 2.25;
-
-          double powerMin = 0.9;   // minimum shooter speed
-          double powerMax = 1;    // full speed
-         
-          double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);
-
-          m_calculatedPower =
-              powerMin  + (clampedTz - tzMin) * (powerMax - powerMin) / (tzMax - tzMin);
-
-      }
-
-      double launcherVelocityL = launcherMotorL.getEncoder().getVelocity();
-      double launcherVelocityR = launcherMotorR.getEncoder().getVelocity();
-
-      SmartDashboard.putNumber("Current Tag ID", currentTargetID);
-      SmartDashboard.putBoolean("Valid Tag Locked", isValidTag);
-      SmartDashboard.putNumber("Shooter Distance (m)", tz);
-      SmartDashboard.putNumber("Shooter Target Power", m_calculatedPower);
-      SmartDashboard.putNumber("Actual L RPM", launcherVelocityL);
-      SmartDashboard.putNumber("Actual R RPM", launcherVelocityR);
-      SmartDashboard.putNumber("Power", backupPower);
-
+    
+double shootingrpm = 4750;
+    // ================= DASHBOARD OUTPUT =================
+    SmartDashboard.putNumber("Shooter/Target RPM", shootingrpm);
+    SmartDashboard.putNumber("Shooter/Actual L RPM", launcherMotorL.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Shooter/Actual R RPM", launcherMotorR.getEncoder().getVelocity());
   }
 
-  public double getCalculatedPower() {
-      return m_calculatedPower;
+  // ================= CONTROL METHODS =================
+
+  public void runVelocityFromLimelight() {
+    closedLoopControllerL.setReference(m_calculatedRPM, ControlType.kVelocity);
   }
 
-  /**
-   * Runs launcher with percentage power
-   */
-  public void runLauncher(double power) {
-      cachedPower = power;
+  public void runFixedShooting( ) {
+    closedLoopControllerL.setReference(4750, ControlType.kVelocity);
+  }
 
-      launcherMotorL.set(power);
-      launcherMotorR.set(power);
+  public void runFromDashboard() {
+    double setpoint = SmartDashboard.getNumber("Shooter/Setpoint", 0);
+    closedLoopControllerL.setReference(setpoint, ControlType.kVelocity);
+  }
+
+  public void runLauncher(double rpm) {
+    closedLoopControllerL.setReference(rpm, ControlType.kVelocity);
   }
 
   public void stopLauncher() {
-      cachedPower = 0;
-      launcherMotorL.stopMotor();
-      launcherMotorR.stopMotor();
+    launcherMotorL.stopMotor();
   }
 
-   public void LauncherOut() {
-      
-
-      launcherMotorL.set(-.3);
-      launcherMotorR.set(-.3);
-  }
-
-   public void launcherBackup() {
-      
-    //m_leds.launchColor();
-      launcherMotorL.set(backupPower);
-      launcherMotorR.set(backupPower);
-  }
-
-  public void adjustBackupPower(double delta) {
-    backupPower = MathUtil.clamp(backupPower + delta, 0.0, 1.0);
-  }
-
-  public double getBackupPower() {
-    return backupPower;
-  }
-
-  public void holdLastPower() {
-      runLauncher(cachedPower);
-  }
-
-  public void setPower(double power) {
-      cachedPower = power;
-  }
 }

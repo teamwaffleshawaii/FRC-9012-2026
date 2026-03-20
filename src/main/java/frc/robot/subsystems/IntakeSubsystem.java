@@ -16,9 +16,8 @@ public class IntakeSubsystem extends SubsystemBase {
     // Motor Controllers
     // ==============================
 
-    private final SparkMax intakeLeft = new SparkMax(13, MotorType.kBrushless);
-    private final SparkMax intakeRight = new SparkMax(14, MotorType.kBrushless);
-
+    private final SparkFlex intakeVortex = new SparkFlex(19, MotorType.kBrushless);
+    
     // ==============================
     // Pneumatics (REV PH CAN ID: 2)
     // ==============================
@@ -36,32 +35,31 @@ public class IntakeSubsystem extends SubsystemBase {
     // ==============================
 
     public IntakeSubsystem() {
-        SparkMaxConfig leftConfig = new SparkMaxConfig();
-        SparkMaxConfig rightConfig = new SparkMaxConfig();
-        // Inversion
-        rightConfig.inverted(true);
-        // Brake mode
-        leftConfig.idleMode(IdleMode.kBrake);
-        rightConfig.idleMode(IdleMode.kBrake);
-        // Current limit (IMPORTANT for NEO 550)
-        leftConfig.smartCurrentLimit(20);
-        rightConfig.smartCurrentLimit(20);
-        // Apply configs to motors
-        intakeLeft.configure(leftConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
-        intakeRight.configure(rightConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
-    }
+    //     SparkMaxConfig leftConfig = new SparkMaxConfig();
+    //     SparkMaxConfig rightConfig = new SparkMaxConfig();
+    //     // Inversion
+    //     rightConfig.inverted(true);
+    //     // Brake mode
+    //     leftConfig.idleMode(IdleMode.kBrake);
+    //     rightConfig.idleMode(IdleMode.kBrake);
+    //     // Current limit (IMPORTANT for NEO 550)
+    //     leftConfig.smartCurrentLimit(20);
+    //     rightConfig.smartCurrentLimit(20);
+    //     // Apply configs to motors
+    //     intakeLeft.configure(leftConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+    //     intakeRight.configure(rightConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+     }
 
     // ==============================
     // Intake Control
     // ==============================
 
     public void runIntake(double speed) {
-        intakeLeft.set(speed);
-        intakeRight.set(speed);
+        intakeVortex.set(speed);
     }
 
     public void intakeIn() {
-        runIntake(.85);
+        runIntake(1);
     }
 
     public void intakeInFullPower() {
@@ -69,7 +67,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeOut() {
-        runIntake(-0.8);
+        runIntake(-0.35);
     }
 
     //For during transfer to prevent FUELs from being stuck by the intake
@@ -104,6 +102,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Optional: Add SmartDashboard telemetry here
+     
     }
 }
