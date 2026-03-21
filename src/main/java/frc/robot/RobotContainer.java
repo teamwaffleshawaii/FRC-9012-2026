@@ -26,6 +26,7 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AlignToAprilTagCommand;
+import frc.robot.commands.AlignToTrenchCommand;
 import frc.robot.commands.AlingToTowerCommand;
 import frc.robot.subsystems.*;
 
@@ -57,7 +58,7 @@ public class RobotContainer {
   private final TransferSubsystem m_transfer = new TransferSubsystem();
   private final LEDSubsystem m_leds = new LEDSubsystem();
    private final ElevatorSubsystem m_elevator = new ElevatorSubsystem();
-  //...Add more here
+ 
 
    private final SendableChooser<Command> autoChooser;
 
@@ -69,11 +70,15 @@ public class RobotContainer {
   //For drivetrain speed control
   double speedFactor = 0.5 * (1 - m_driverController.getRawAxis(4));  //drivetrain speed control 
   
+
+  
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
 
   public RobotContainer() {
+    m_intake.pivotUp();
+
 
     rotationPID.enableContinuousInput(-180, 180); // crucial for full rotations
     rotationPID.setTolerance(1.0);           // optional, small deadband
@@ -92,40 +97,42 @@ public class RobotContainer {
             )   
     );
  
-    NamedCommands.registerCommand("IntakeDown",
-        new SequentialCommandGroup(new InstantCommand(m_intake::pivotDown, m_intake)));
-    
-    // Action: Intake Up/Store (Button 1 logic)
-    NamedCommands.registerCommand("IntakeUp", new ParallelCommandGroup(
-       // new StartEndCommand(m_intake::intakeInFullPower, m_intake::intakeStop).withTimeout(3.0),
-        new SequentialCommandGroup(new InstantCommand(m_intake::pivotUp))));
+   NamedCommands.registerCommand("IntakeDown",
+    new InstantCommand(m_intake::pivotDown, m_intake)
+);
 
-        NamedCommands.registerCommand("IntakeIn", new ParallelCommandGroup(
-        new StartEndCommand(m_intake::intakeIn, m_intake::intakeStop).withTimeout(3.0)));
-       
+NamedCommands.registerCommand("IntakeUp",
+    new InstantCommand(m_intake::pivotUp, m_intake)
+);
 
+NamedCommands.registerCommand("IntakeIn",
+    new StartEndCommand(
+        m_intake::intakeIn,
+        m_intake::intakeStop,
+        m_intake
+    ).withTimeout(3.0)
+);
 
-    // Action: Spin up and Launch (Button 11 + 10 logic)
-         NamedCommands.registerCommand("Launcher", new ParallelCommandGroup(
-        new ParallelCommandGroup(
-          new InstantCommand(m_launcher::runFixedShooting, m_launcher),
-            new InstantCommand(m_transfer::transferIn, m_transfer),
-            new InstantCommand(m_transfer::mecanumIn, m_transfer),
-            new InstantCommand(m_intake::intakeTransfer, m_intake)
-        )));
-        // NamedCommands.registerCommand("LaunchSequence", new SequentialCommandGroup(
-    
+// NamedCommands.registerCommand("Launcher",
+//     new ParallelCommandGroup(
+//     //    new RunCommand(() -> m_launcher.runFixedShooting(), m_launcher),
+//         new RunCommand(() -> m_transfer.transferIn(), m_transfer),
+//         new RunCommand(() -> m_transfer.mecanumIn(), m_transfer),
+//         new RunCommand(() -> m_intake.intakeTransfer(), m_intake)
+//     )
+// );
 
-    // // Action: Stop all intake/launcher motors
-    NamedCommands.registerCommand("StopAll", new ParallelCommandGroup(
-        new InstantCommand(m_launcher::stopLauncher, m_launcher),
-        new InstantCommand(m_transfer::transferStop, m_transfer),
-        new InstantCommand(m_intake::intakeStop, m_intake),
-        new InstantCommand(m_transfer::mecanumStop, m_transfer)
-    ));
-
+// NamedCommands.registerCommand("StopAll",
+//     new InstantCommand(() -> {
+//         m_launcher.stopLauncher();
+//         m_transfer.transferStop();
+//         m_intake.intakeStop();
+//         m_transfer.mecanumStop();
+//     })
+// );
     // Do all other initialization
-    configureButtonBindings();
+   configureButtonBindings();
+
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -165,9 +172,7 @@ public class RobotContainer {
               // ---------- Drive Command ----------
               m_robotDrive.drive(xSpeed, ySpeed, rotSpeed, true);
 
-              // ---------- Telemetry ----------
-              SmartDashboard.putNumber("Translation Factor", translationFactor);
-              SmartDashboard.putNumber("Rotation Factor", rotationFactor);
+            
           }, m_robotDrive
       )
     );
@@ -193,13 +198,16 @@ public class RobotContainer {
             () -> m_robotDrive.zeroHeading(),
             m_robotDrive));
 
-          //  new JoystickButton(m_driverController, 11)
+
+            
+
+       //    new JoystickButton(m_driverController, 11)
         // .onTrue(new InstantCommand(
-        //     () -> m_launcher.adjustBackupPower( 0.005)));
+        //     () -> m_launcher.runFixedShooting( 25)));
         //    ;
         //    new JoystickButton(m_driverController, 12)
         // .onTrue(new InstantCommand(
-        //     () -> m_launcher.adjustBackupPower(-.005)));
+        //     () -> m_launcher.runFixedShooting(-25)));
         //    ;
 
 
@@ -217,19 +225,26 @@ public class RobotContainer {
     ));
 
     new JoystickButton(m_driverController, 4)
-    .whileTrue(new AlingToTowerCommand(
+    .whileTrue(new AlignToTrenchCommand(
         m_robotDrive,
-        6,      // target tag ID
+        12,      // target tag ID
         3.0     // timeout seconds
     ));
 
+    // new JoystickButton(m_driverController, 4)
+    // .whileTrue(new AlingToTowerCommand(
+    //     m_robotDrive,
+    //     32,      // target tag ID
+    //     3.0     // timeout seconds
+    // ));
 
-    new JoystickButton(m_driverController, 1)
-    .whileTrue(new AlignToAprilTagCommand(
-        m_robotDrive,
-        6,      // target tag ID
-        3.0     // timeout seconds
-    ));
+
+    // new JoystickButton(m_driverController, 1)
+    // .whileTrue(new AlignToAprilTagCommand(
+    //     m_robotDrive,
+    //     6,      // target tag ID
+    //     3.0     // timeout seconds
+    // ));
 
     //Add button bindings here:
 
@@ -283,7 +298,7 @@ public class RobotContainer {
     
     //Button 8 → Reverse intake (safety)
     new JoystickButton(operatorController, 8)
-      .onTrue(new InstantCommand(m_intake::intakeOut, m_intake));
+      .whileTrue(new InstantCommand(m_intake::intakeOut, m_intake));
     
     //Button 9 → Reverse transfer (safety)
     //Yet to be added
@@ -301,12 +316,11 @@ public class RobotContainer {
         new InstantCommand(() -> m_intake.intakeStop(), m_intake)
       ));
     
-    new JoystickButton(operatorController, 11)
-      .onTrue(new SequentialCommandGroup( // changed from SequentialCommandGroup
-        new InstantCommand(m_launcher::runFixedShooting, m_launcher)));
-
-        // return m_launcher.backupPower
-        ;
+    // new JoystickButton(operatorController, 11)
+    //   .onTrue(new SequentialCommandGroup( // changed from SequentialCommandGroup
+    //   new InstantCommand(m_launcher::runFixedShooting, m_launcher)));
+    //    // new InstantCommand(m_launcher::runFixedShooting, m_launcher)));
+    //     ;
 
    new JoystickButton(operatorController, 9)
       .onTrue(new SequentialCommandGroup( // changed from SequentialCommandGroup
@@ -323,122 +337,36 @@ public class RobotContainer {
      
       
     
+new JoystickButton(operatorController, 12)
+      .onTrue(new SequentialCommandGroup( // changed from SequentialCommandGroup
+      
+        new InstantCommand(m_launcher::stopLauncher, m_launcher)));
+   
+      
 
     //Button 12 → Launchers Off
-    new JoystickButton(operatorController, 12)
-      .onTrue(new InstantCommand(() -> m_launcher.stopLauncher(), m_launcher));
+    new JoystickButton(operatorController, 11)
+    .onTrue(new RunCommand(() -> {
+        LimelightHelpers.SetFiducialIDFiltersOverride(
+            "limelight-launch",
+            LauncherSubsystem.validTags
+        );
+m_launcher.runVelocityFromLimelight();
 
-    
-/*
-     // Constants
-    double targetDistanceMetersTZ = 1.40; // meters
-    double targetDistanceMetersTX = 0.45; // meters
-    double targetHeadingRY = 0;
-
-    double distanceKp = 0.5;
-    double strafeKp = 0.5;
-    double steeringKp = 0.5;
-
-    // >>> SELECT WHICH APRILTAG TO ALIGN TO <<<
-    int targetAprilTagID = 15;
-
- new JoystickButton(operatorController, 8)
-        .whileTrue(new RunCommand(
-            () -> {
-
-                double seenTagID = LimelightHelpers.getFiducialID("limelight-launch");
-
-                if (seenTagID != targetAprilTagID) {
-                    m_robotDrive.drive(0, 0, 0, false);
-                    return;
-                }
-                int seenID = (int) LimelightHelpers.getFiducialID("limelight-launch");
-                if (seenID != 32) {
-                    m_launcher.stopLauncher();
-                    return;
-                }
-                // botPose array: [x, y, z, roll, pitch, yaw]
-                double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
-
-                double currentStrafeX  = botPose[0]; // Left/Right
-                double currentDistanceZ = botPose[2]; // Forward/Back
-                double currentYaw       = botPose[4]; // Rotation relative to AprilTag
-
-                // Errors
-                double distanceError = -targetDistanceMetersTZ - currentDistanceZ;
-                double strafeError   = -targetDistanceMetersTX - currentStrafeX;
-                double steeringError = targetHeadingRY - currentYaw;
-                double radError = Math.toRadians(steeringError);
-
-                // Deadbands
-                if (Math.abs(distanceError) < 0.02) distanceError = 0;
-                if (Math.abs(strafeError) < 0.02) strafeError = 0;
-                if (Math.abs(steeringError) < 2.0) steeringError = 0;
-
-                m_robotDrive.drive(
-                    distanceError * distanceKp,   // Forward/back
-                    -strafeError * strafeKp,      // Left/Right
-                    -radError * steeringKp,       // Rotation
-                    false
-                );
-            },
-            m_robotDrive
-        ));
-*/
-
-    // BUTTON NUMBER 9 (right Apr-Tag) sets launcher rpm to distance value of apriltag
-    // new JoystickButton(operatorController, 11).onTrue(new RunCommand(() -> {
-
-
-    //         new InstantCommand(m_launcher::launcherBackup, m_launcher);
-    //         // LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", LauncherSubsystem.validTags);
-    //         // m_launcher.runLauncher(m_launcher.getCalculatedPower());
-
-    //      }, m_launcher))//.onFalse(
-    //                     //  new SequentialCommandGroup(
-    //                     //      new InstantCommand(m_launcher::holdLastPower, m_launcher),
-    //                     //      new InstantCommand(() -> LimelightHelpers.SetFiducialIDFiltersOverride("limelight-launch", new int[] {}))
-    //                     // )//)
-    //                   ;
-
-/* 
-    new JoystickButton(operatorController, 9).whileTrue(new RunCommand(() -> {
-        boolean hasTarget = LimelightHelpers.getTV("limelight-launch");
-        
-        // 1. Declare variables with default values here so the whole command can see them
-        double tz = 0.0;
-        double targetRPM = 0.0; 
-
-        if (hasTarget) {
-            double[] botPose = LimelightHelpers.getBotPose_TargetSpace("limelight-launch");
-            tz = Math.abs(botPose[2]); // Update the outer variable
-
-            double tzMin = 0.4;
-            double tzMax = 3.0;
-            double rpmMin = 0.0;
-            double rpmMax = 6784.0;
-
-            double clampedTz = MathUtil.clamp(tz, tzMin, tzMax);
-
-            // 2. Assign the calculation to the variable declared above
-            targetRPM = rpmMin + (clampedTz - tzMin) * (rpmMax - rpmMin) / (tzMax - tzMin);
-
-            m_launcher.runLauncher(targetRPM);
-        } 
-        else {
-            m_launcher.holdLastVelocity();
-            // Optionally: targetRPM = m_launcher.getLastVelocity(); // To keep dashboard accurate
-        }
-
-        // 3. Now these can access 'tz' and 'targetRPM' regardless of the if/else outcome
-        SmartDashboard.putNumber("Shooter Distance (m)", tz);
-        SmartDashboard.putNumber("Shooter Distance (ft)", (tz * 3.28084));
-        SmartDashboard.putNumber("Shooter RPM", targetRPM);
-
-    }, m_launcher)).onFalse(new InstantCommand(m_launcher::stopLauncher, m_launcher)); */
-  
-
-  
+    }, m_launcher))
+    .onFalse(new InstantCommand(() -> {
+        m_launcher.stopLauncher();
+        LimelightHelpers.SetFiducialIDFiltersOverride(
+            "limelight-launch",
+            new int[] {}
+        );
+    }));
+     /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
+ 
   }
 
   /**
@@ -454,48 +382,9 @@ public class RobotContainer {
 }
 
 
-  public Command getAutonomousCommand() { 
+
+  
+   public Command getAutonomousCommand() { 
     return autoChooser.getSelected();
-    /*
-    // Create config for trajectory
-    //return new PathPlannerAuto("Example Auto");
-    TrajectoryConfig config = new TrajectoryConfig(
-        AutoConstants.kMaxSpeedMetersPerSecond,
-        AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-        // Add kinematics to ensure max speed is actually obeyed
-        .setKinematics(DriveConstants.kDriveKinematics);
-
-    // An example trajectory to follow. All units in meters.
-    Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-        // Start at the origin facing the +X direction
-        new Pose2d(0, 0, new Rotation2d(0)),
-        // Pass through these two interior waypoints, making an 's' curve path
-        List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-        // End 3 meters straight ahead of where we started, facing forward
-        new Pose2d(3, 0, new Rotation2d(0)),
-        config);
-
-    var thetaController = new ProfiledPIDController(
-        AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
-    thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-    SwerveControllerCommand swerveControllerCommand = new SwerveControllerCommand(
-        exampleTrajectory,
-        m_robotDrive::getPose, // Functional interface to feed supplier
-        DriveConstants.kDriveKinematics,
-
-        // Position controllers
-        new PIDController(AutoConstants.kPXController, 0, 0),
-        new PIDController(AutoConstants.kPYController, 0, 0),
-        thetaController,
-        m_robotDrive::setModuleStates,
-        m_robotDrive);
-
-    // Reset odometry to the starting pose of the trajectory.
-    m_robotDrive.resetOdometry(exampleTrajectory.getInitialPose());
-
-    // Run path following command, then stop at the end.
-    return swerveControllerCommand.andThen(() -> m_robotDrive.drive(0, 0, 0, false));
-    */
   }
 }
